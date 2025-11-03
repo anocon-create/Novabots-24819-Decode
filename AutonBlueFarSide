@@ -30,6 +30,9 @@ public class AutonBlueFarSide extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+            telemetry.addLine("Please make sure to have the catapult facing the goal");
+            telemetry.update();
+
              // Drive the robot to the corner of the big shooting zone
             setDrivePower(-1);
             sleep(2500);
