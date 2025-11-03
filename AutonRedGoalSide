@@ -34,12 +34,12 @@ public class AutonRedGoalSide extends LinearOpMode {
             sleep(2500);
             setDrivePower(0);  // stop
 
-            // Spin catapults backward briefly
+            // Crank that Shinji
             catapultRight.setPower(-1);
             catapultLeft.setPower(-1);
             sleep(1000);
 
-            // Spin catapults forward briefly
+            // IPPO IS SHOOTING AT US
             catapultRight.setPower(1);
             catapultLeft.setPower(1);
             setDrivePower(0);
@@ -49,7 +49,7 @@ public class AutonRedGoalSide extends LinearOpMode {
             catapultRight.setPower(0);
             catapultLeft.setPower(0);
 
-            // Strafe robot right
+            // Slide to right. Take it back now yall
             frontLeftMotor.setPower(1);
             backLeftMotor.setPower(-1);
             frontRightMotor.setPower(1);
@@ -57,7 +57,7 @@ public class AutonRedGoalSide extends LinearOpMode {
             sleep(1000);
             setDrivePower(0); // Stop the strafe
 
-            // Stop drive motors
+            // Stop. Wait a minute. Fill my cup put some liquor in it. Take a sip. Sign a check. Julio grab the stretch. Ride to Harlem, Hollywood, Jackson, Mississippi
             setDrivePower(0);
             sleep(1000);
 
