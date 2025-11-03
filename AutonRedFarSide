@@ -27,5 +27,12 @@ public class AutonRedFarSide extends LinearOpMode {
         // Wait for start
         waitForStart();
 
+// Helper method for setting all drive motor powers
+    private void setDrivePower(double power) {
+        frontLeftMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backRightMotor.setPower(power);
+
         if (opModeIsActive()) {
 
