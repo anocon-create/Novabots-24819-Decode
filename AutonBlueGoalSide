@@ -1,4 +1,4 @@
-@Autonomous(name="AutonBlueGoalSide", group ="Linear OpMode")
+@Autonomous(name="AutonBlueGoalSide", group="Linear OpMode")
 public class AutonBlueGoalSide extends LinearOpMode {
 
     // Declare motors
