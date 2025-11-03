@@ -18,7 +18,7 @@ public class AutonBlueFarSide extends LinearOpMode {
         frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
         backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
         backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
-        catapultRight   = hardwareMap.get(DcMotor.class, "portThree");
+        catapultRight   = hardwareMap.get(DcMotor.class, "catapultRight");
         catapultLeft    = hardwareMap.get(DcMotor.class, "catapultLeft");
 
         // Reverse the right side motors
