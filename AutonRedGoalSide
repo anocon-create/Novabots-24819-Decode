@@ -1,5 +1,5 @@
 # robotics-coding-stuff
-@Autonomous(name="AutonRedGoalSide", group ="Linear OpMode")
+@Autonomous(name="AutonRedGoalSide", group="Linear OpMode")
 public class AutonRedGoalSide extends LinearOpMode {
 
     // Declare motors
