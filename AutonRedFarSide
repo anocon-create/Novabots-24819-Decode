@@ -63,7 +63,7 @@ public class AutonRedFarSide extends LinearOpMode {
             backRightMotor.setPower(-1);
             sleep(1000);
 
-            // Stop drive motors
+            // Stop. Wait a minute.
             setDrivePower(0);
             sleep(1000);
 
