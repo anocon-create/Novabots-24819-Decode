@@ -71,7 +71,7 @@ public class AutonBlueFarSide extends LinearOpMode {
             setDrivePower(0);
             sleep(1000);
 
-            telemetry.addLine("Autonomous sequence complete!");
+            telemetry.addLine("Autonomous sequence complete! Good luck!");
             telemetry.update();
          }
     }
