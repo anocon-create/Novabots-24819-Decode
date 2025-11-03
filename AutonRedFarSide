@@ -56,7 +56,7 @@ public class AutonRedFarSide extends LinearOpMode {
             catapultRight.setPower(0);
             catapultLeft.setPower(0);
 
-             // Strafe robot right
+             // Slide to the right. Take it back now yall
             frontLeftMotor.setPower(1);
             backLeftMotor.setPower(-1);
             frontRightMotor.setPower(1);
