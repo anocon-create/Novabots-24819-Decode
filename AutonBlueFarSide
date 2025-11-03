@@ -1,6 +1,6 @@
 
 # robotics-coding-stuff
-@Autonomous(name="AutonBlueFarSide", group ="Linear OpMode")
+@Autonomous(name="AutonBlueFarSide", group="Linear OpMode")
 public class AutonBlueFarSide extends LinearOpMode {
 
     // Declare motors
