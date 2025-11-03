@@ -52,12 +52,13 @@ public class AutonBlueGoalSide extends LinearOpMode {
             catapultLeft.setPower(0);
             sleep(1000);
 
-            // Turn robot
+            // Strafe robot to the left
             frontLeftMotor.setPower(-1);
             backLeftMotor.setPower(1);
             frontRightMotor.setPower(-1);
             backRightMotor.setPower(1);
             sleep(1000);
+            setDrivePower(0); //Stop the strafe
 
             // Stop drive motors
             setDrivePower(0);
