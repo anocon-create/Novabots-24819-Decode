@@ -17,7 +17,7 @@ public class AutonRedFarSide extends LinearOpMode {
         frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
         backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
         backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
-        catapultRight   = hardwareMap.get(DcMotor.class, "portThree");
+        catapultRight   = hardwareMap.get(DcMotor.class, "catapultRight");
         catapultLeft    = hardwareMap.get(DcMotor.class, "catapultLeft");
 
         // Reverse the right side motors
@@ -34,7 +34,7 @@ public class AutonRedFarSide extends LinearOpMode {
             sleep(2500);
             setDrivePower(0);
 
-               // Turn the robot to face the red goal
+            // Turn the robot to face the red goal
             frontLeftMotor.setPower(1);
             backLeftMotor.setPower(1);
             frontRightMotor.setPower(-1);
@@ -63,7 +63,7 @@ public class AutonRedFarSide extends LinearOpMode {
             backRightMotor.setPower(-1);
             sleep(1000);
 
-            // Stop. Wait a minute.
+            // Stop. Wait a minute. Fill my cup put some liquor in it. Take a sip. Sign a check. Julio grab the stretch. Ride to Harlem, Hollywood, Jackson, Mississippi
             setDrivePower(0);
             sleep(1000);
 
