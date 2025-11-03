@@ -1,6 +1,6 @@
 # robotics-coding-stuff
-@Autonomous(name="AutonRed", group ="Linear OpMode")
-public class AutonRed extends LinearOpMode {
+@Autonomous(name="AutonRedGoalSide", group ="Linear OpMode")
+public class AutonRedGoalSide extends LinearOpMode {
 
     // Declare motors
     private DcMotor frontLeftMotor = null;
@@ -48,7 +48,7 @@ public class AutonRed extends LinearOpMode {
             catapultRight.setPower(0);
             catapultLeft.setPower(0);
 
-            // Turn robot
+            // Strafe robot right
             frontLeftMotor.setPower(1);
             backLeftMotor.setPower(-1);
             frontRightMotor.setPower(1);
