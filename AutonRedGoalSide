@@ -55,6 +55,7 @@ public class AutonRedGoalSide extends LinearOpMode {
             frontRightMotor.setPower(1);
             backRightMotor.setPower(-1);
             sleep(1000);
+            setDrivePower(0); // Stop the strafe
 
             // Stop drive motors
             setDrivePower(0);
