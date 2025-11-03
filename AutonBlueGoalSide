@@ -44,8 +44,7 @@ public class AutonBlueGoalSide extends LinearOpMode {
             // KAMEHAMEHA
             catapultRight.setPower(1);
             catapultLeft.setPower(1);
-            setDrivePower(0);
-            sleep(1000);
+            sleep(200);
 
             // Stop catapults
             catapultRight.setPower(0);
