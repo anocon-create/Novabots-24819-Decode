@@ -1,1 +1,76 @@
 # robotics-coding-stuff
+@Autonomous(name="AutonRed", group ="Linear OpMode")
+public class AutonRed extends LinearOpMode {
+
+    // Declare motors
+    private DcMotor frontLeftMotor = null;
+    private DcMotor frontRightMotor = null;
+    private DcMotor backLeftMotor = null;
+    private DcMotor backRightMotor = null;
+    private DcMotor catapultRight = null;
+    private DcMotor catapultLeft = null;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        // Initialize hardware
+        frontLeftMotor  = hardwareMap.get(DcMotor.class, "portOneExp");
+        frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
+        backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
+        backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
+        catapultRight   = hardwareMap.get(DcMotor.class, "portThree");
+        catapultLeft    = hardwareMap.get(DcMotor.class, "catapultLeft");
+
+        // Reverse the right side motors
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Wait for start
+        waitForStart();
+
+        if (opModeIsActive()) {
+
+            // Drive backward for 2.5 seconds
+            setDrivePower(-1);
+            sleep(2500);
+            setDrivePower(0);  // stop
+
+            // Spin catapults backward briefly
+            catapultRight.setPower(-1);
+            catapultLeft.setPower(-1);
+            sleep(1000);
+
+            // Spin catapults forward briefly
+            catapultRight.setPower(1);
+            catapultLeft.setPower(1);
+            sleep(1000);
+
+            // Stop catapults
+            catapultRight.setPower(0);
+            catapultLeft.setPower(0);
+
+            // Turn robot
+            frontLeftMotor.setPower(1);
+            backLeftMotor.setPower(-1);
+            frontRightMotor.setPower(1);
+            backRightMotor.setPower(-1);
+            sleep(1000);
+
+            // Stop drive motors
+            setDrivePower(0);
+            sleep(1000);
+
+            telemetry.addLine("Autonomous sequence complete!");
+            telemetry.update();
+        }
+    }
+
+    // Helper method for setting all drive motor powers
+    private void setDrivePower(double power) {
+        frontLeftMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backRightMotor.setPower(power);
+    }
+}
+
+
