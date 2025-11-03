@@ -28,6 +28,9 @@ public class AutonBlueGoalSide extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+            telemetry.addLine("Please make sure to have the catapult facing the goal");
+            telemetry.update();
+
             // Drive backward for 2.5 seconds
             setDrivePower(-1);
             sleep(2500);
