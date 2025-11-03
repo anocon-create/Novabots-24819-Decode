@@ -37,13 +37,13 @@ public class AutonRedGoalSide extends LinearOpMode {
             // Crank that Shinji
             catapultRight.setPower(-1);
             catapultLeft.setPower(-1);
-            sleep(1000);
+            sleep(800);
 
             // IPPO IS SHOOTING AT US
             catapultRight.setPower(1);
             catapultLeft.setPower(1);
             setDrivePower(0);
-            sleep(1000);
+            sleep(300);
 
             // Stop catapults
             catapultRight.setPower(0);
