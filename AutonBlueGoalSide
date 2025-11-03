@@ -36,12 +36,12 @@ public class AutonBlueGoalSide extends LinearOpMode {
             sleep(2500);
             setDrivePower(0);  // stop
 
-            // Spin catapults backward briefly
+            // Shinji crank that soulja boy
             catapultRight.setPower(-1);
             catapultLeft.setPower(-1);
             sleep(1000);
 
-            // Spin catapults forward briefly
+            // KAMEHAMEHA
             catapultRight.setPower(1);
             catapultLeft.setPower(1);
             setDrivePower(0);
