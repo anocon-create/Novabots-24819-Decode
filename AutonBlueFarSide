@@ -54,7 +54,7 @@ public class AutonBlueFarSide extends LinearOpMode {
             // IPPOS SHOOTING AT US
             catapultRight.setPower(1);
             catapultLeft.setPower(1);
-            sleep(1000);
+            sleep(200);
 
             // Stop catapult
             catapultRight.setPower(0);
