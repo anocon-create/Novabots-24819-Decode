@@ -42,6 +42,7 @@ public class AutonRedGoalSide extends LinearOpMode {
             // Spin catapults forward briefly
             catapultRight.setPower(1);
             catapultLeft.setPower(1);
+            setDrivePower(0);
             sleep(1000);
 
             // Stop catapults
