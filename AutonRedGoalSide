@@ -1,4 +1,10 @@
-# robotics-coding-stuff
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 @Autonomous(name="AutonRedGoalSide", group="Linear OpMode")
 public class AutonRedGoalSide extends LinearOpMode {
 
@@ -17,8 +23,8 @@ public class AutonRedGoalSide extends LinearOpMode {
         frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
         backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
         backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
-        catapultRight   = hardwareMap.get(DcMotor.class, "catapultRight");
-        catapultLeft    = hardwareMap.get(DcMotor.class, "catapultLeft");
+        catapultRight   = hardwareMap.get(DcMotor.class, "portThree");
+        catapultLeft    = hardwareMap.get(DcMotor.class, "portTwoExp");
 
         // Reverse the right side motors
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -30,38 +36,40 @@ public class AutonRedGoalSide extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Drive backward for 2.5 seconds
-            setDrivePower(-1);
-            sleep(2500);
+            setDrivePower(.3);
+            sleep(3000);
             setDrivePower(0);  // stop
 
             // Crank that Shinji
+            catapultRight.setPower(.85);
+            catapultLeft.setPower(.85);
+            sleep(1500);
+    
             catapultRight.setPower(-1);
             catapultLeft.setPower(-1);
-            sleep(1000);
-
-            // IPPO IS SHOOTING AT US
-            catapultRight.setPower(1);
-            catapultLeft.setPower(1);
-            sleep(200);
-
-            // Stop catapults
+            sleep(3000);
+    
             catapultRight.setPower(0);
             catapultLeft.setPower(0);
+            sleep(1000);
 
-            // Slide to right. Take it back now yall
-            frontLeftMotor.setPower(1);
-            backLeftMotor.setPower(-1);
-            frontRightMotor.setPower(1);
-            backRightMotor.setPower(-1);
+            // Slide to right
+            frontLeftMotor.setPower(-0.5);
+            backLeftMotor.setPower(0.5);
+            frontRightMotor.setPower(0.5);
+            backRightMotor.setPower(-0.5);
             sleep(1000);
             setDrivePower(0); // Stop the strafe
-
-            // Stop. Wait a minute. Fill my cup put some liquor in it. Take a sip. Sign a check. Julio grab the stretch. Ride to Harlem, Hollywood, Jackson, Mississippi
+            
+            setDrivePower(0);
+            sleep(1000);
+            
+            setDrivePower(0.75);
+            sleep(1500);
             setDrivePower(0);
             sleep(1000);
 
             telemetry.addLine("Autonomous sequence complete! Good luck!");
-            telemetry.addLine("67")
             telemetry.update();
         }
     }
@@ -73,6 +81,4 @@ public class AutonRedGoalSide extends LinearOpMode {
         frontRightMotor.setPower(power);
         backRightMotor.setPower(power);
     }
-}
-
-
+}  // <--- final closing brace for the class
