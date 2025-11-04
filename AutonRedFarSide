@@ -1,5 +1,11 @@
-# robotics-coding-stuff
-@Autonomous(name="AutonRedFarSide", group="Linear OpMode")
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+@Autonomous (name="AutonRedFarSide", group="Linear OpMode")
 public class AutonRedFarSide extends LinearOpMode {
 
     // Declare motors
@@ -17,8 +23,8 @@ public class AutonRedFarSide extends LinearOpMode {
         frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
         backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
         backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
-        catapultRight   = hardwareMap.get(DcMotor.class, "catapultRight");
-        catapultLeft    = hardwareMap.get(DcMotor.class, "catapultLeft");
+        catapultRight   = hardwareMap.get(DcMotor.class, "portThree");
+        catapultLeft    = hardwareMap.get(DcMotor.class, "portTwoExp");
 
         // Reverse the right side motors
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -30,38 +36,44 @@ public class AutonRedFarSide extends LinearOpMode {
         if (opModeIsActive()) {
 
              // Drive the robot to the corner of the big shooting zone
-            setDrivePower(-1);
-            sleep(2500);
+            setDrivePower(-0.75);
+            sleep(1750);
             setDrivePower(0);
+            sleep(1000);
 
             // Turn the robot to face the red goal
-            frontLeftMotor.setPower(1);
-            backLeftMotor.setPower(1);
-            frontRightMotor.setPower(-1);
-            backRightMotor.setPower(-1);
-            sleep(500);
+            frontLeftMotor.setPower(0.15);
+            backLeftMotor.setPower(0.15);
+            frontRightMotor.setPower(-0.15);
+            backRightMotor.setPower(-0.15);
+            sleep(2000);
             setDrivePower(0);
-
-            // Crank that shinji 
+            
+            setDrivePower(0.3);
+            sleep(1000);
+            setDrivePower(0);
+            sleep(1000);
+            
+            // Crank that Shinji
+            catapultRight.setPower(.85);
+            catapultLeft.setPower(.85);
+            sleep(1500);
+    
             catapultRight.setPower(-1);
             catapultLeft.setPower(-1);
-            sleep(1000);
-
-            // IPPOS SHOOTING AT US
-            catapultRight.setPower(1);
-            catapultLeft.setPower(1);
-            sleep(200);
-
-            // Stop catapult
+            sleep(3000);
+    
             catapultRight.setPower(0);
             catapultLeft.setPower(0);
+            sleep(1000);
 
              // Slide to the right. Take it back now yall
-            frontLeftMotor.setPower(1);
-            backLeftMotor.setPower(-1);
-            frontRightMotor.setPower(1);
-            backRightMotor.setPower(-1);
+            frontLeftMotor.setPower(-0.5);
+            backLeftMotor.setPower(0.5);
+            frontRightMotor.setPower(0.5);
+            backRightMotor.setPower(-0.5);
             sleep(1000);
+            setDrivePower(0); // Stop the strafe
 
             // Stop. Wait a minute. Fill my cup put some liquor in it. Take a sip. Sign a check. Julio grab the stretch. Ride to Harlem, Hollywood, Jackson, Mississippi
             setDrivePower(0);
