@@ -35,7 +35,7 @@ public class AutonRedGoalSide extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            // Drive backward for 2.5 seconds
+            // Drive backward for 3 seconds
             setDrivePower(.3);
             sleep(3000);
             setDrivePower(0);  // stop
@@ -63,7 +63,8 @@ public class AutonRedGoalSide extends LinearOpMode {
             
             setDrivePower(0);
             sleep(1000);
-            
+
+            // Take it back now yall
             setDrivePower(0.75);
             sleep(1500);
             setDrivePower(0);
