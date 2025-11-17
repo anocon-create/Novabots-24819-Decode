@@ -1,0 +1,38 @@
+@TeleOp(name="flywheeltest", group="Linear OpMode")
+
+public class flywheeltest extends Linear OpMode{
+
+  privateDcMotor flywheelleft = null;
+  privateDcMotor flywheelright = null;
+
+  @Override
+public void runOpMode() {
+
+    DcMotor leftMotor;
+    DcMotor rightMotor;
+
+    // Need to replace leftMotor and rightMotor with the port names
+    leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
+    rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
+
+    waitForStart();
+
+    while (opModeIsActive()) {
+
+        double leftPower  = 0;
+        double rightPower = 0;
+
+        // If A is pressed → full power
+        if (gamepad2.a) {
+            leftPower  = 1.0;
+            rightPower = 1.0;
+        } else {
+            // Otherwise no power (or put your normal drive code here)
+            leftPower  = 0;
+            rightPower = 0;
+        }
+
+        leftMotor.setPower(leftPower);
+        rightMotor.setPower(rightPower);
+    }
+}
