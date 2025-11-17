@@ -1,38 +1,54 @@
-@TeleOp(name="flywheeltest", group="Linear OpMode")
+package org.firstinspires.ftc.teamcode;
 
-public class flywheeltest extends Linear OpMode{
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-  privateDcMotor flywheelleft = null;
-  privateDcMotor flywheelright = null;
+@TeleOp(name = "flywheeltest", group = "Linear OpMode")
+public class FlywheelTest extends LinearOpMode {
 
-  @Override
-public void runOpMode() {
+    private DcMotor flywheelLeft = null;
+    private DcMotor flywheelRight = null;
 
-    DcMotor leftMotor;
-    DcMotor rightMotor;
+    @Override
+    public void runOpMode() {
 
-    // Need to replace leftMotor and rightMotor with the port names
-    leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
-    rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
+        // Replace these names with the exact names from your robot configuration
+        flywheelLeft = hardwareMap.get(DcMotor.class, "leftMotor");
+        flywheelRight = hardwareMap.get(DcMotor.class, "rightMotor");
 
-    waitForStart();
+        // If motors are mirrored on the robot, set one to REVERSE
+        flywheelLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-    while (opModeIsActive()) {
+        // Optional: make motors brake when power is zero
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        double leftPower  = 0;
-        double rightPower = 0;
+        telemetry.addData("Status", "Ready");
+        telemetry.update();
 
-        // If A is pressed → full power
-        if (gamepad2.a) {
-            leftPower  = 1.0;
-            rightPower = 1.0;
-        } else {
-            // Otherwise no power (or put your normal drive code here)
-            leftPower  = 0;
-            rightPower = 0;
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            double power = 0.0;
+
+            // If A on gamepad2 is pressed → full power
+            if (gamepad2.a) {
+                power = 1.0;
+            } else {
+                power = 0.0;
+            }
+
+            flywheelLeft.setPower(power);
+            flywheelRight.setPower(power);
+
+            // Telemetry to help debug
+            telemetry.addData("flywheelPower", power);
+            telemetry.addData("gamepad2.a", gamepad2.a);
+            telemetry.update();
         }
-
-        leftMotor.setPower(leftPower);
-        rightMotor.setPower(rightPower);
     }
 }
