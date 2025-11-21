@@ -1,0 +1,42 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+@Autonomous(name="AIntakeRedFar", group="Linear OpMode")
+public class AIntakeRedFar extends LinearOpMode {
+
+    // Declare motors
+    private DcMotor frontLeftMotor = null;
+    private DcMotor frontRightMotor = null;
+    private DcMotor backLeftMotor = null;
+    private DcMotor backRightMotor = null;
+    private DcMotor intake1= null;
+    private DcMotor intake2 = null;
+    private DcMotor flywheelLeft = null;
+    private DcMotor flywheelRight = null;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        // Initialize hardware
+        frontLeftMotor  = hardwareMap.get(DcMotor.class, "portOneExp");
+        frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
+        backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
+        backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
+        intake1 = hardwareMap.get(DcMotor.class, "portThree");
+        intake2 = hardwareMap.get(DcMotor.class, "portTwoExp");
+        flywheelLeft = hardwareMap.get(DcMotor.class, "");
+        flywheelRight = hardwareMap.get(DcMotor.class, "");
+
+        // Reverse the right side motors
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Wait for start
+        waitForStart();
+
+        if (opModeIsActive()) {
+
