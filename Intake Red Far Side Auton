@@ -18,6 +18,14 @@ public class AIntakeRedFar extends LinearOpMode {
     private DcMotor flywheelLeft = null;
     private DcMotor flywheelRight = null;
 
+    public void setDrivePower(double power) {
+    leftFront.setPower(power);
+    leftRear.setPower(power);
+    rightFront.setPower(power);
+    rightRear.setPower(power);
+}
+
+
     @Override
     public void runOpMode() throws InterruptedException {
         // Initialize hardware
@@ -40,3 +48,229 @@ public class AIntakeRedFar extends LinearOpMode {
 
         if (opModeIsActive()) {
 
+        // Start up the flywheel
+        flywheelLeft.setPower(1);
+        flywheelRight.setPower(1);
+        sleep(15);
+
+        // Turn on the intake, spin the intakes so the balls go into the flywheel. Launch the ball with the flywheels
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
+        flywheelLeft.setPower(1);
+        flywheelRight.setPower(1);
+        sleep(800);
+
+        // Turn the bot to face the loading zone
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(1);
+        sleep(200);
+        setDrivePower(0);
+
+        // Move towards the loading zone and intake the artifacts
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(1)
+        intake1.setPower(-1);
+        intake2.setPower(-1);
+        sleep(750);
+        setDrivePower(0);
+        intake1.setPower(0);
+        intake2.setPower(0);
+
+        // Move back to the shooting zone
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(-1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(-1);
+        sleep(750);
+        setDrivePower(0);
+
+        // Turn back towards the goal
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        backRightMotor.setPower(1);
+        sleep(200);
+        setDrivePower(0);
+
+         // Turn on the intake, spin the intakes so the balls go into the flywheel. Launch the ball with the flywheels
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
+        flywheelLeft.setPower(1);
+        flywheelRight.setPower(1);
+        sleep(800);
+        intake1.setPower(0);
+        intake2.setPower(0);
+        flywheelLeft.setPower(0);
+        flywheelRight.setPower(0);
+
+        // Move forward into the close shooting zone
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(1);
+        sleep(750);
+        setDrivePower(0);
+
+        // Strafe right to hit the lever and release the artifacts
+        frontLeftMotor.setPower(-0.5);
+        backLeftMotor.setPower(0.5);
+        frontRightMotor.setPower(0.5);
+        backRightMotor.setPower(-0.5);
+        sleep(500);
+        setDrivePower(0);
+
+        // Strafe left to go back to the shooting zone 
+        frontLeftMotor.setPower(0.5);
+        backLeftMotor.setPower(-0.5);
+        frontRightMotor.setPower(-0.5);
+        backRightMotor.setPower(0.5);
+
+        // Turn to the right to face artifacts
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(1);
+        sleep(200);
+        setDrivePower(0);
+
+        // Start intake and drive into the artifacts to intake them
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(1);
+        intake1.setPower(-0.5);
+        intake2.SetPower(-0.5);
+        sleep(300);
+        setDrivePower(0);
+        intake1.setPower(0);
+        intake2.setPower(0);
+
+        // Drive back to the shooting zone
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(-1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        sleep(250);
+        setDrivePower(0);
+
+        // Turn on the intake and shoot the artifacts
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
+        flywheelLeft.setPower(0.75);
+        flywheelRight.setPower(0.75);
+        sleep(800);
+        intake1.setPower(0);
+        intake2.setPower(0);
+        flywheelLeft.setPower(0);
+        flywheelRight.setPower(0);
+
+        // Move forward slightly in the large shooting zone
+        frontRightMotor.setPower(0.5);
+        frontLeftMotor.setPower(0.5);
+        backRightMotor.setPower(0.5);
+        backLeftMotor.setPower(0.5);
+        sleep(500);
+        setDrivePower(0);
+
+        // Turn to the right to face artifacts
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(1);
+        sleep(200);
+        setDrivePower(0);
+
+        // Start intake and drive into the artifacts to intake them
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(1);
+        intake1.setPower(-0.5);
+        intake2.SetPower(-0.5);
+        sleep(300);
+        setDrivePower(0);
+        intake1.setPower(0);
+        intake2.setPower(0);
+
+        // Drive back to the shooting zone
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(-1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        sleep(250);
+        setDrivePower(0);
+
+        // Turn on the intake and shoot the artifacts
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
+        flywheelLeft.setPower(0.75);
+        flywheelRight.setPower(0.75);
+        sleep(800);
+        intake1.setPower(0);
+        intake2.setPower(0);
+        flywheelLeft.setPower(0);
+        flywheelRight.setPower(0);
+
+        // Move forward slightly in the large shooting zone
+        frontRightMotor.setPower(0.5);
+        frontLeftMotor.setPower(0.5);
+        backRightMotor.setPower(0.5);
+        backLeftMotor.setPower(0.5);
+        sleep(500);
+        setDrivePower(0);
+
+        // Turn to the right to face artifacts
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(1);
+        sleep(200);
+        setDrivePower(0);
+
+        // Start intake and drive into the artifacts to intake them
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(1);
+        intake1.setPower(-0.5);
+        intake2.SetPower(-0.5);
+        sleep(300);
+        setDrivePower(0);
+        intake1.setPower(0);
+        intake2.setPower(0);
+
+        // Drive back to the shooting zone
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(-1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        sleep(250);
+        setDrivePower(0);
+
+        // Turn on the intake and shoot the artifacts
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
+        flywheelLeft.setPower(0.75);
+        flywheelRight.setPower(0.75);
+        sleep(800);
+        intake1.setPower(0);
+        intake2.setPower(0);
+        flywheelLeft.setPower(0);
+        flywheelRight.setPower(0);
+
+        //Move backwards to get ready to hit the lever
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(-1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        sleep(250);
+        setDrivePower(0);
+
+        telemetry.addLine("Auton Done");
+        telemetry.update();
+    }
+}
