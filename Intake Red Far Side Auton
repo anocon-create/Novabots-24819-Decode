@@ -51,7 +51,7 @@ public class AIntakeRedFar extends LinearOpMode {
         // Start up the flywheel
         flywheelLeft.setPower(1);
         flywheelRight.setPower(1);
-        sleep(15);
+        sleep(150);
 
         // Turn on the intake, spin the intakes so the balls go into the flywheel. Launch the ball with the flywheels
         intake1.setPower(-0.5);
