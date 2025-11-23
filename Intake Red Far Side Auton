@@ -48,10 +48,10 @@ public class AIntakeRedFar extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-        // Start up the flywheel
-        flywheelLeft.setPower(1);
-        flywheelRight.setPower(1);
-        sleep(150);
+        // Start the intake
+        intake1.setPower(-0.5);
+        intake2.setPower(0.5);
+        sleep(200);
 
         // Turn on the intake, spin the intakes so the balls go into the flywheel. Launch the ball with the flywheels
         intake1.setPower(-0.5);
@@ -59,6 +59,28 @@ public class AIntakeRedFar extends LinearOpMode {
         flywheelLeft.setPower(1);
         flywheelRight.setPower(1);
         sleep(800);
+
+        // Move forward slightly
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(1);
+        sleep(200);
+        setDrivePower(0);
+
+        // Turn to face the field wall
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        sleep(150);
+        setDrivePower(0);
+
+        // Drive towards field wall
+        // Start up the flywheel
+        flywheelLeft.setPower(1);
+        flywheelRight.setPower(1);
+        sleep(150);
 
         // Turn the bot to face the loading zone
         frontRightMotor.setPower(-1);
@@ -93,7 +115,7 @@ public class AIntakeRedFar extends LinearOpMode {
         frontLeftMotor.setPower(-1);
         backLeftMotor.setPower(-1);
         backRightMotor.setPower(1);
-        sleep(200);
+        sleep(250);
         setDrivePower(0);
 
          // Turn on the intake, spin the intakes so the balls go into the flywheel. Launch the ball with the flywheels
