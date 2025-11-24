@@ -1,0 +1,221 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+@Autonomous(name="IntakeRedClose", group="Linear OpMode")
+public class IntakeRedClose extends LinearOpMode {
+
+    // Declare motors
+    private DcMotor frontLeftMotor = null;
+    private DcMotor frontRightMotor = null;
+    private DcMotor backLeftMotor = null;
+    private DcMotor backRightMotor = null;
+    private DcMotor intake1= null;
+    private DcMotor intake2 = null;
+    private DcMotor flywheelLeft = null;
+    private DcMotor flywheelRight = null;
+
+    public void setDrivePower(double power) {
+    leftFront.setPower(power);
+    leftRear.setPower(power);
+    rightFront.setPower(power);
+    rightRear.setPower(power);
+}
+
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        // Initialize hardware
+        frontLeftMotor  = hardwareMap.get(DcMotor.class, "portOneExp");
+        frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
+        backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
+        backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
+        intake1 = hardwareMap.get(DcMotor.class, "portThree");
+        intake2 = hardwareMap.get(DcMotor.class, "portTwoExp");
+        flywheelLeft = hardwareMap.get(DcMotor.class, "");
+        flywheelRight = hardwareMap.get(DcMotor.class, "");
+
+        // Reverse the right side motors
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Wait for start
+        waitForStart();
+
+        if (opModeIsActive()) {
+
+      // Move backwards
+      frontRightMotor.setPower(-1);
+      frontLeftMotor.setPower(-1);
+      backRightMotor.setPower(-1);
+      backLeftMotor.setPower(-1);
+      sleep(400);
+      setDrivePower(0);
+
+      // Start the intake and flywheels 
+      flywheel1.setPower(-1);
+      flywheel2.setPower(-1);
+      intake1.setPower(-0.5);
+      intake2.setPower(-0.5);
+      sleep(350);
+
+      // Turn to the first row of artifacts
+      frontRightMotor.setPower(1);
+      frontLeftMotor.setPower(-1);
+      backRightMotor.setPower(1);
+      backLeftMotor.setPower(-1);
+      sleep(250);
+      setDrivePower(0);
+
+      // Begin start intake and drive into row of artifacts
+      intake1.setPower(-0.5);
+      intake2.setPower(-0.5:
+      frontRightMotor.setPower(1);
+      frontLeftMotor.setPower(1);
+      backRightMotor.setPower(1);
+      backLeftMotor.setPower(1);
+      sleep(400);
+      setDrivePower(0);
+
+      // Move backwards to shooting zone
+      frontRightMotor.setPower(-1);
+      frontLeftMotor.setPower(-1);
+      backRightMotor.setPower(-1);
+      backLeftMotor.setPower(-1);
+      sleep(350);
+      setDrivePower(0);
+
+      // Turn to the goal
+      frontRightMotor.setPower(-1);
+      frontLeftMotor.setPower(1);
+      backRightMotor.setPower(-1);
+      backLeftMotor.setPower(1);
+      sleep(200);
+      setDrivePower(0);
+
+      // Shoot artifacts
+      intake1.setPower(-0.5);
+      intake2.setPower(-0.5);
+      flywheel1.setPower(1);
+      flywheel2.setPower(1);
+      sleep(350);
+
+      // Turn to face the lever
+      frontRightMotor.setPower(0.5);
+      frontLeftMotor.setPower(-0.5);
+      backRightMotor.setPower(0.5);
+      backLeftMotor.setPower(-0.5);
+      sleep(400);
+      setDrivePower(0);
+
+      // Hit the lever
+      frontRightMotor.setPower(1);
+      frontLeftMotor.setPower(1);
+      backRightMotor.setPower(1);
+      backLeftMotor.setPower(1);
+      sleep(350);
+      setDrivePower(0);
+
+      // Move backwards
+      frontRightMotor.setPower(-1);
+      frontLeftMotor.setPower(-1);
+      backRightMotor.setPower(-1);
+      backLeftMotor.setPower(-1);
+      sleep(250);
+
+      // Strafe right to the artifacts
+      frontLeftMotor.setPower(1);
+      backLeftMotor.setPower(-1);
+      frontRightMotor.setPower(-1);
+      backRightMotor.setPower(1);
+      sleep(250);
+      setDrivePower(0);
+
+      // Turn on intake and drive into artifacts
+      intake1.setPower(-0.5);
+      intake2.setPower(-0;5);
+      frontRightMotor.setPower(1);
+      frontLeftMotor.setPower(1);
+      backRightMotor.setPower(1);  
+      backLeftMotor.setPower(1);
+      sleep(500);
+      setDrivePower(0);
+
+      // Reverse to shooting zone
+      frontRightMotor.setPower(-1);
+      frontLeftMotor.setPower(-1);
+      backRightMotor.setPower(-1);
+      backLeftMotor.setPower(-1);
+      sleep(400);
+      setDrivePower(0);
+
+      // Turn to face the goal
+      frontRightMotor.setPower(0.5);
+      frontLeftMotor.setPower(-0.5);
+      backRightMotor.setPower(0.5);
+      backLeftMotor.setPower(-0.5);
+      sleep(400);
+      setDrivePower(0);
+
+      // Shoot artiacts
+      flywheel1.setPower(-0.5);
+      flywheel2.setPower(-0.5);
+      intake1.setPower(-0.5);
+      intake2.setPower(-0.5);
+      sleep(500);
+
+      // Turn to face the field wall
+      frontRightMotor.setPower(-0.5);
+      frontLeftMotor.setPower(0.5);
+      backRightMotor.setPower(0.5);
+      backLeftMotor.setPower(-0.5);
+      sleep(450);
+      setDrivePower(0);
+
+      // Strafe right to the artifacts
+      frontLeftMotor.setPower(1);
+      backLeftMotor.setPower(-1);
+      frontRightMotor.setPower(-1);
+      backRightMotor.setPower(1);
+      sleep(250);
+      setDrivePower(0);
+
+      // Turn on intake and drive into artifacts
+      intake1.setPower(-0.5);
+      intake2.setPower(-0;5);
+      frontRightMotor.setPower(1);
+      frontLeftMotor.setPower(1);
+      backRightMotor.setPower(1);  
+      backLeftMotor.setPower(1);
+      sleep(500);
+      setDrivePower(0);
+
+      // Reverse to shooting zone
+      frontRightMotor.setPower(-1);
+      frontLeftMotor.setPower(-1);
+      backRightMotor.setPower(-1);
+      backLeftMotor.setPower(-1);
+      sleep(400);
+      setDrivePower(0);
+
+      // Turn to face the goal
+      frontRightMotor.setPower(0.5);
+      frontLeftMotor.setPower(-0.5);
+      backRightMotor.setPower(0.5);
+      backLeftMotor.setPower(-0.5);
+      sleep(400);
+      setDrivePower(0);
+
+      // Shoot artiacts
+      flywheel1.setPower(-0.75);
+      flywheel2.setPower(-0.75);
+      intake1.setPower(-0.5);
+      intake2.setPower(-0.5);
+      sleep(500);
+
+
+
