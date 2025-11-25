@@ -60,6 +60,14 @@ public class AIntakeRedFar extends LinearOpMode {
         flywheelRight.setPower(1);
         sleep(800);
 
+        // Turn slightly to the left to be perpindicular to the wall 
+        frontRightMotor.setPower(0.5);
+        frontLeftMotor.setPower(-0.5);
+        backRightMotor.setPower(0.5);
+        backLeftMotor.setPower(-0.5);
+        sleep(250);
+        setDrivePower(0);
+
         // Move forward slightly
         frontRightMotor.setPower(1);
         frontLeftMotor.setPower(1);
