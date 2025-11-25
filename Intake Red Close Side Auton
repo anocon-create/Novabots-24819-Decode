@@ -217,20 +217,86 @@ public class IntakeRedClose extends LinearOpMode {
       intake2.setPower(-0.5);
       sleep(500);
 
-       // Move forward slightly
-       frontRightMotor.setPower(1);
-       frontLeftMotor.setPower(1);
-       backRightMotor.setPower(1);
-       backLeftMotor.setPower(1);
-       sleep(250);
-       setDrivePower(0);
+        // Move backwards to get ready to intake artifacts in loading zone
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(-1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        sleep(400);
+        setDrivePower(0);
 
-      // Strafe right to end auton by lever
+        // Face field wall
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(1);
+        sleep(275);
+        setDrivePower(0);
+
+        // Drive into field wall
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backRightMotor.setPower(1);
+        sleep(500);
+        setDrivePower(0);
+
+        // Turn to face artifacts
+        frontRightMotor.setPower(-1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(1);
+        sleep(300);
+        setDrivePower(0);
+
+        // Turn on intake and drive into row of artifacts
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(1);
+        sleep(300);
+        setDrivePower(0);
+
+        // Strafe right to far shooting zone
       frontLeftMotor.setPower(1);
       backLeftMotor.setPower(-1);
       frontRightMotor.setPower(-1);
       backRightMotor.setPower(1);
       sleep(250);
       setDrivePower(0);
+
+        // Turn to face goal
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(-1);
+        backRightMotor.setPower(-1);
+        backLeftMotor.setPower(-1);
+        sleep(500);
+        setDrivePower(0);
+
+        // Turn on intake and fire the artifacts
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
+        flywheelLeft.setPower(-1);
+        flywheelRight.setPower(-1);
+        sleep(400);
+
+        // Drive forward to large shooting zone
+        frontRightMotor.setPower(1);
+        frontLeftMotor.setPower(1);
+        backRightMotor.setPower(1);
+        backLeftMotor.setPower(1);
+        sleep(400);
+        setDrivePower(0);
+
+        // Strafe right to leave shooting zone and get ready to hit the lever at end of auton
+      frontLeftMotor.setPower(1);
+      backLeftMotor.setPower(-1);
+      frontRightMotor.setPower(-1);
+      backRightMotor.setPower(1);
+      sleep(250);
+      setDrivePower(0);
+
     }
 }
