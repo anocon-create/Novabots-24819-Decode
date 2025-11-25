@@ -29,14 +29,14 @@ public class IntakeRedClose extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Initialize hardware
-        frontLeftMotor  = hardwareMap.get(DcMotor.class, "portOneExp");
-        frontRightMotor = hardwareMap.get(DcMotor.class, "portZero");
-        backLeftMotor   = hardwareMap.get(DcMotor.class, "portTwo");
-        backRightMotor  = hardwareMap.get(DcMotor.class, "portOne");
-        intake1 = hardwareMap.get(DcMotor.class, "portThree");
-        intake2 = hardwareMap.get(DcMotor.class, "portTwoExp");
-        flywheelLeft = hardwareMap.get(DcMotor.class, "");
-        flywheelRight = hardwareMap.get(DcMotor.class, "");
+        frontLeftMotor  = hardwareMap.get(DcMotor.class, "port");
+        frontRightMotor = hardwareMap.get(DcMotor.class, "port");
+        backLeftMotor   = hardwareMap.get(DcMotor.class, "port");
+        backRightMotor  = hardwareMap.get(DcMotor.class, "port");
+        intake1 = hardwareMap.get(DcMotor.class, "port");
+        intake2 = hardwareMap.get(DcMotor.class, "port");
+        flywheelLeft = hardwareMap.get(DcMotor.class, "port");
+        flywheelRight = hardwareMap.get(DcMotor.class, "port");
 
         // Reverse the right side motors
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
