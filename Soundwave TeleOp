@@ -80,12 +80,12 @@ public class SoundwaveTeleop extends LinearOpMode {
             // GAMEPAD 2 FLYWHEELS
             // -------------------------
             if (gamepad2.a) {
-                flywheelLeft.setPower(1.0);
-                flywheelRight.setPower(1.0);
+                flywheelLeft.setPower(-1.0);
+                flywheelRight.setPower(-1.0);
             }
             else if (gamepad2.x) {
-                flywheelLeft.setPower(0.5);
-                flywheelRight.setPower(0.5);
+                flywheelLeft.setPower(-0.5);
+                flywheelRight.setPower(-0.5);
             }
             else {
                 flywheelLeft.setPower(0.0);
