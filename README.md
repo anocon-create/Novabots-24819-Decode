@@ -1,1 +1,1 @@
-The attached programs are code for FTC Decode 2025 Novabots. The codes are for the auton phase of the match and include shooting and moving out of the shooting zone for both red/blue goal side along with far side. 
+The attached programs are code for FTC Decode 2025 Novabots. The codes are for the auton phase of the match and include shooting and moving out of the shooting zone for both red/blue goal side along with far side. Currently working on programming auton for both close and far side with an intake and flywheel shooter
