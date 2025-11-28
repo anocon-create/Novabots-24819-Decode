@@ -1,1 +1,38 @@
-package.org
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+@Autonomous(name="EncoderTest", group="Linear OpMode")
+public class EncoderTest extends LinearOpMode {
+  DcMotor motor;
+  double ticks = 537.7;
+  double NewTarget;
+
+  private DcMotor frontRightMotor = null;
+  private DcMotor frontLeftMotor = null;
+  private DcMotor backRightMotor = null;
+  private DcMotor backLeftMotor = null;
+  private DcMotor intake1 = null;
+  private DcMotor intake2 = null;
+  private DcMotor flywheelleft = null;
+  private DcMotor flywheelright = null;
+
+  @Override
+  public void init() {
+    frontRightMotor = hardwareMap.get(DcMotor.class, "port");
+    frontLeftMotor = hardwareMap.get(DcMotor.class, "port");
+    backRightMotor = hardwareMap.get(DcMotor.class, "port");
+    backLeftMotor = hardwareMap.get(DcMotor.class, "port");
+    intake1 = hardwareMap.get(DcMotor.class, "port");
+    intake2 = hardwareMap.get(DcMotor.class, "port");
+    flywheelleft = hardwareMap.get(DcMotor.class, "port");
+    flywheelright = hardwareMap.get(DcMotor.class, "port");
+
+    frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    
