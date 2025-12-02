@@ -1,0 +1,59 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+@TeleOp(name = "Flywheel TeleOp", group = "Competition")
+public class FlywheelTeleOp extends LinearOpMode {
+
+    private DcMotor flywheelLeft;
+    private DcMotor flywheelRight;
+
+    private boolean flywheelOn = false;
+    private boolean aWasPressed = false;
+
+    @Override
+    public void runOpMode() {
+
+        // --- Hardware Mapping ---
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "flywheelLeft");
+        flywheelRight = hardwareMap.get(DcMotor.class, "flywheelRight");
+
+        // Optional: reverse one motor so they spin the same direction
+        flywheelRight.setDirection(DcMotor.Direction.REVERSE);
+
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        telemetry.addLine("Ready to launch!");
+        telemetry.update();
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            // -------------------------
+            //  Button A Toggle Logic
+            // -------------------------
+            if (gamepad1.a && !aWasPressed) {
+                flywheelOn = !flywheelOn;   // toggle
+            }
+            aWasPressed = gamepad1.a;
+
+            // -------------------------
+            //  Flywheel Power Control
+            // -------------------------
+            if (flywheelOn) {
+                flywheelLeft.setPower(1.0);
+                flywheelRight.setPower(1.0);
+            } else {
+                flywheelLeft.setPower(0);
+                flywheelRight.setPower(0);
+            }
+
+            telemetry.addData("Flywheels", flywheelOn ? "ON" : "OFF");
+            telemetry.update();
+        }
+    }
+}
