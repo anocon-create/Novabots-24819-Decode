@@ -84,9 +84,9 @@ public class RedEncoderCloseAuton extends LinearOpMode {
 
       driveForDistance(-6, 0.5);
 
-      strafeForDistance(40, 0.8, true);
+      strafeForDistance(40, 0.8, false);
 
-      strafeForDistance(40,0.6, false);
+      strafeForDistance(40,0.6, true);
 
       driveForDistance(-12, 0.6);
 
@@ -98,7 +98,7 @@ public class RedEncoderCloseAuton extends LinearOpMode {
 
       TurnForAngle(125, 0.7);
 
-      strafeForDistance(4, 0.5, false);
+      strafeForDistance(4, 0.5, true);
 
       shootBall();
 
@@ -112,35 +112,31 @@ public class RedEncoderCloseAuton extends LinearOpMode {
 
       driveForDistance(60, 0.7);
 
-      strafeForDistance(12, 0.5, false);
-
       TurnForAngle(125, 0.6);
 
       shootBall();
 
-      TurnForAngle(-35, 0.6);
+      TurnForAngle(-125, 0.6);
 
       intakeBall();
 
       driveForDistance(60, 0.7);
 
-      strafeForDistance(12, 0.5, false);
-
       TurnForAngle(125, 0.6);
 
       shootBall();
 
-      TurnForAngle(-35, 0.6);
+      TurnForAngle(-125, 0.6);
 
       intakeBall();
 
       driveForDistance(60, 0.7);
 
-      strafeForDistance(12, 0.5, false);
-
       TurnForAngle(125, 0.6);
 
       shootBall();
+
+      driveForDistance(36, 0.8);
 
       stopMotors();
 
