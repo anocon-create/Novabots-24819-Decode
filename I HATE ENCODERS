@@ -156,6 +156,8 @@ public class RedEncoderFarAuton extends LinearOpMode {
 
         shootball();
 
+        TurnForAngle(-35, 0.7);
+
         driveForDistance(36, 0.7);
 
         stopMotors();
