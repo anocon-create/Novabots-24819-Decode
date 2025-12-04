@@ -1,26 +1,25 @@
-
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name="Blue Encoder Far Auton", group="Linear OpMode")
+@Autonomous(name = "Blue Encoder Far Auton", group = "Linear OpMode")
 public class BlueEncoderFarAuton extends LinearOpMode {
 
     // === Drive Motors ===
-    private DcMotor frontLeftMotor  = null;
+    private DcMotor frontLeftMotor = null;
     private DcMotor frontRightMotor = null;
-    private DcMotor backLeftMotor   = null;
-    private DcMotor backRightMotor  = null;
+    private DcMotor backLeftMotor = null;
+    private DcMotor backRightMotor = null;
     private DcMotor intake1 = null;
     private DcMotor intake2 = null;
     private DcMotor flywheelLeft = null;
     private DcMotor flywheelRight = null;
 
-    // === Encoder Constants (GoBILDA 5203-19:1) ===
+    // === Encoder Constants ===
     public static final double COUNTS_PER_REV = 580.4;
     public static final double WHEEL_DIAMETER_INCHES = 3.78;
     public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER_INCHES;
@@ -28,43 +27,43 @@ public class BlueEncoderFarAuton extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        // --- Hardware Mapping (matches TeleOp) ---
+
+        // === HARDWARE MAPPING (temporary placeholders) ===
         frontLeftMotor  = hardwareMap.get(DcMotor.class, "port");
         frontRightMotor = hardwareMap.get(DcMotor.class, "port");
         backLeftMotor   = hardwareMap.get(DcMotor.class, "port");
         backRightMotor  = hardwareMap.get(DcMotor.class, "port");
-        intake1 = hardwareMap.get(DcMotor.class, "port");
-        intake2 = hardwareMap.get(DcMotor.class, "port");
-        flywheelLeft = hardwareMap.get(DcMotor.class, "port");
-        flywheelRight = hardwareMap.get(DcMotor.class, "port");
+        intake1         = hardwareMap.get(DcMotor.class, "port");
+        intake2         = hardwareMap.get(DcMotor.class, "port");
+        flywheelLeft    = hardwareMap.get(DcMotor.class, "port");
+        flywheelRight   = hardwareMap.get(DcMotor.class, "port");
 
-        // Optional servos (if you want to control funnel later)
-
-        // --- Motor Directions (match TeleOp) ---
+        // === DIRECTION SETTINGS ===
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intake1.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheelLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // --- Zero Power Behavior ---
-        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // === ZERO POWER BEHAVIOR ===
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        // --- Reset Encoders ---
+        // === RESET ENCODERS ===
         resetEncoders();
 
-        telemetry.addLine("Initialized and ready");
+        telemetry.addLine("Initialized and Ready");
         telemetry.update();
 
         waitForStart();
-
         if (isStopRequested()) return;
+
+        // === FULL AUTON SEQUENCE (EXACT ORDER PRESERVED) ===
 
         shootBall();
 
@@ -72,7 +71,7 @@ public class BlueEncoderFarAuton extends LinearOpMode {
 
         TurnForAngle(15, 0.5);
 
-        strafeForDistance(8, 0.5,false);
+        strafeForDistance(8, 0.5, false);
 
         intakeBall();
 
@@ -82,12 +81,11 @@ public class BlueEncoderFarAuton extends LinearOpMode {
 
         shootBall();
 
-        TurnForAngle(15,0.5);
+        TurnForAngle(15, 0.5);
 
         driveForDistance(72, 1);
 
         strafeForDistance(36, 1, false);
-
         strafeForDistance(36, 1, true);
 
         driveForDistance(12, 0.5);
@@ -114,7 +112,7 @@ public class BlueEncoderFarAuton extends LinearOpMode {
 
         TurnForAngle(90, 0.6);
 
-        driveForDistance(-60,1);
+        driveForDistance(-60, 1);
 
         TurnForAngle(-25, 0.5);
 
@@ -136,17 +134,7 @@ public class BlueEncoderFarAuton extends LinearOpMode {
 
         TurnForAngle(35, 0.6);
 
-        TurnforAngle(90,0.6);
-
-        intakeBall();
-
-        driveForDistance(54,0.6);
-
-        TurnForAngle(-125, 0.6);
-
-        shootBall();
-
-        TurnForAngle (125, 0.6);
+        TurnForAngle(90, 0.6);  // FIXED: was "TurnforAngle"
 
         intakeBall();
 
@@ -154,7 +142,17 @@ public class BlueEncoderFarAuton extends LinearOpMode {
 
         TurnForAngle(-125, 0.6);
 
-        shootball();
+        shootBall(); // FIXED: was "shootball"
+
+        TurnForAngle(125, 0.6);
+
+        intakeBall();
+
+        driveForDistance(54, 0.6);
+
+        TurnForAngle(-125, 0.6);
+
+        shootBall();
 
         TurnForAngle(35, 0.7);
 
@@ -163,7 +161,7 @@ public class BlueEncoderFarAuton extends LinearOpMode {
         stopMotors();
     }
 
-    // === Reset Encoders ===
+    // === RESET ENCODERS ===
     private void resetEncoders() {
         frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -176,204 +174,159 @@ public class BlueEncoderFarAuton extends LinearOpMode {
         backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-public void shootBall() {
-    ElapsedTime timer = new ElapsedTime();
+    // === SHOOT BALL ===
+    public void shootBall() {
+        ElapsedTime timer = new ElapsedTime();
 
-    // Short initial delay
-    timer.reset();
-    while (opModeIsActive() && timer.seconds() < 1.0) {}
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 1.0) {}
 
-    // Spin flywheels
-    flywheelLeft.setPower(-1);
-    flywheelRight.setPower(-1);
+        flywheelLeft.setPower(-1);
+        flywheelRight.setPower(-1);
 
-    // Tiny delay to let motors spool up
-    timer.reset();
-    while (opModeIsActive() && timer.seconds() < 0.15) {}
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 0.15) {}
 
-    // Start intake to feed ball
-    intake1.setPower(-0.5);
-    intake2.setPower(-0.5);
+        intake1.setPower(-0.5);
+        intake2.setPower(-0.5);
 
-    timer.reset();
-    while (opModeIsActive() && timer.seconds() < 1.5) {}
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 1.5) {}
 
-    // Stop everything
-    intake1.setPower(0);
-    intake2.setPower(0);
-    flywheelLeft.setPower(0);
-    flywheelRight.setPower(0);
+        flywheelLeft.setPower(0);
+        flywheelRight.setPower(0);
+        intake1.setPower(0);
+        intake2.setPower(0);
 
-    // Optional pause before next action
-    timer.reset();
-    while (opModeIsActive() && timer.seconds() < 0.5) {}
-}
-
-public void intakeBall() {
-    ElapsedTime timer = new ElapsedTime();
-
-    // Optional short delay before moving
-    timer.reset();
-    while (opModeIsActive() && timer.seconds() < 0.5) {}
-
-    // Start intake and drive motors
-    frontLeftMotor.setPower(-0.6);
-    frontRightMotor.setPower(-0.6);
-    backLeftMotor.setPower(-0.6);
-    backRightMotor.setPower(-0.6);
-    intake1.setPower(-0.4);
-    intake2.setPower(-0.4);
-
-    // Run for 1.5 seconds
-    timer.reset();
-    while (opModeIsActive() && timer.seconds() < 1.5) {
-        telemetry.addData("Intaking", "Running...");
-        telemetry.update();
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 0.5) {}
     }
 
-    // Stop all motors
-    stopMotors();
-    intake1.setPower(0);
-    intake2.setPower(0);
+    // === INTAKE BALL ===
+    public void intakeBall() {
+        ElapsedTime timer = new ElapsedTime();
 
-    // Optional pause after intake
-    timer.reset();
-    while (opModeIsActive() && timer.seconds() < 1.0) {}
-}
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 0.5) {}
 
+        frontLeftMotor.setPower(-0.6);
+        frontRightMotor.setPower(-0.6);
+        backLeftMotor.setPower(-0.6);
+        backRightMotor.setPower(-0.6);
+        intake1.setPower(-0.4);
+        intake2.setPower(-0.4);
 
-public void TurnForAngle(double angleDegrees, double power) {
-    // --- Effective track width compensation ---
-    double TRACK_WIDTH = 21.3028;           // actual track width in inches
-    // Calculate robot circumference based on effective width
-    double ROBOT_CIRCUMFERENCE = Math.PI * TRACK_WIDTH;
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 1.5) {}
 
-    // Distance each side must travel for desired angle
-    double turnInches = ROBOT_CIRCUMFERENCE * (angleDegrees / 360.0);
-    int targetTicks = (int) (turnInches * TICKS_PER_INCH);
+        stopMotors();
+        intake1.setPower(0);
+        intake2.setPower(0);
 
-    // Left motors go forward, right motors go backward for clockwise turn
-    frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + targetTicks);
-    backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() + targetTicks);
-    frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - targetTicks);
-    backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() - targetTicks);
-
-    // Switch to RUN_TO_POSITION mode
-    frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-    // Apply power
-    frontLeftMotor.setPower(power);
-    backLeftMotor.setPower(power);
-    frontRightMotor.setPower(power);
-    backRightMotor.setPower(power);
-
-    // Wait until all motors reach target
-    while (opModeIsActive() &&
-           frontLeftMotor.isBusy() && frontRightMotor.isBusy() &&
-           backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-
-        telemetry.addData("Turning", angleDegrees + " deg");
-        telemetry.addData("Target Ticks", targetTicks);
-        telemetry.addData("FL", frontLeftMotor.getCurrentPosition());
-        telemetry.addData("FR", frontRightMotor.getCurrentPosition());
-        telemetry.update();
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 1.0) {}
     }
 
-    stopMotors();
-}
+    // === TURN ===
+    public void TurnForAngle(double angleDegrees, double power) {
+        double TRACK_WIDTH = 21.3028;
+        double ROBOT_CIRC = Math.PI * TRACK_WIDTH;
 
+        double inches = ROBOT_CIRC * (angleDegrees / 360.0);
+        int ticks = (int) (inches * TICKS_PER_INCH);
 
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + ticks);
+        backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() + ticks);
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - ticks);
+        backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() - ticks);
 
-
-public void driveForDistance(double distanceInches, double power) {
-         int targetPosition = (int) (distanceInches * TICKS_PER_INCH);
- 
-        // Set target position for all motors
-         frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + targetPosition);
-         backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() + targetPosition);
-         frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + targetPosition);
-         backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() + targetPosition);
- 
-        // Switch to RUN_TO_POSITION mode
-         frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-         backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-         frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-         backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
- 
-         // Apply power to motors
-         frontLeftMotor.setPower(power);
-         backLeftMotor.setPower(power);
-         frontRightMotor.setPower(power);
-         backRightMotor.setPower(power);
-       
- 
-         // Wait until all motors reach their target position
-         while (opModeIsActive() && frontLeftMotor.isBusy() && frontRightMotor.isBusy() &&
-                backLeftMotor.isBusy() && backRightMotor.isBusy()) {
-             telemetry.addData("Target Position", targetPosition);
-             telemetry.addData("Current Position L", frontLeftMotor.getCurrentPosition());
-             telemetry.addData("Current Position R", frontRightMotor.getCurrentPosition());
-             telemetry.addData("Wheel Power L", frontLeftMotor.getPower());
-             telemetry.addData("Wheel Power R", frontRightMotor.getPower());
-             telemetry.update();
-         }
- 
-         // Stop all motors after reaching target
-         stopMotors();
-     }
-    // === Strafing (Left/Right) ===
-    public void strafeForDistance(double distanceInches, double power, boolean strafeRight) {
-        int targetPosition = (int) (distanceInches * TICKS_PER_INCH);
-
-        if (strafeRight) {
-            // Strafe right
-            frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + targetPosition);
-            backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() - targetPosition);
-            frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - targetPosition);
-            backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() + targetPosition);
-        } else {
-            // Strafe left
-            frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - targetPosition);
-            backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() + targetPosition);
-            frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + targetPosition);
-            backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() - targetPosition);
-        }
-
-        // Switch to RUN_TO_POSITION mode
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        // Apply power
         frontLeftMotor.setPower(power);
         backLeftMotor.setPower(power);
         frontRightMotor.setPower(power);
         backRightMotor.setPower(power);
 
-        // Wait until done
         while (opModeIsActive() &&
-              (frontLeftMotor.isBusy() && frontRightMotor.isBusy() &&
-               backLeftMotor.isBusy() && backRightMotor.isBusy())) {
-            telemetry.addData("Strafing", strafeRight ? "Right" : "Left");
-            telemetry.addData("FL Pos", frontLeftMotor.getCurrentPosition());
-            telemetry.addData("FR Pos", frontRightMotor.getCurrentPosition());
-            telemetry.addData("BL Pos", backLeftMotor.getCurrentPosition());
-            telemetry.addData("BR Pos", backRightMotor.getCurrentPosition());
-            telemetry.update();
-        }
+                frontLeftMotor.isBusy() &&
+                frontRightMotor.isBusy() &&
+                backLeftMotor.isBusy() &&
+                backRightMotor.isBusy()) {}
 
         stopMotors();
     }
 
-    // === Stop All Drive Motors ===
+    // === DRIVE STRAIGHT ===
+    public void driveForDistance(double inches, double power) {
+        int ticks = (int) (inches * TICKS_PER_INCH);
+
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + ticks);
+        backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() + ticks);
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + ticks);
+        backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() + ticks);
+
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeftMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backRightMotor.setPower(power);
+
+        while (opModeIsActive() &&
+                frontLeftMotor.isBusy() &&
+                frontRightMotor.isBusy() &&
+                backLeftMotor.isBusy() &&
+                backRightMotor.isBusy()) {}
+
+        stopMotors();
+    }
+
+    // === STRAFE ===
+    public void strafeForDistance(double inches, double power, boolean strafeRight) {
+        int ticks = (int) (inches * TICKS_PER_INCH);
+
+        if (strafeRight) {
+            frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + ticks);
+            backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() - ticks);
+            frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - ticks);
+            backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() + ticks);
+        } else {
+            frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() - ticks);
+            backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() + ticks);
+            frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + ticks);
+            backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() - ticks);
+        }
+
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeftMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backRightMotor.setPower(power);
+
+        while (opModeIsActive() &&
+                frontLeftMotor.isBusy() &&
+                frontRightMotor.isBusy() &&
+                backLeftMotor.isBusy() &&
+                backRightMotor.isBusy()) {}
+
+        stopMotors();
+    }
+
+    // === STOP DRIVE MOTORS ===
     private void stopMotors() {
         frontLeftMotor.setPower(0);
-        backLeftMotor.setPower(0);
         frontRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
         backRightMotor.setPower(0);
 
         frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
