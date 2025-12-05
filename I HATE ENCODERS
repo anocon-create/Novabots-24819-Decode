@@ -69,7 +69,7 @@ public class RedEncoderFarAuton extends LinearOpMode {
 
         driveForDistance(32, 0.8);
 
-        TurnForAngle(-15, 0.5);
+        TurnForAngle(-25, 0.5);
 
         strafeForDistance(8, 0.5, true);
 
@@ -77,23 +77,23 @@ public class RedEncoderFarAuton extends LinearOpMode {
 
         strafeForDistance(24, 0.6, false);
 
-        TurnForAngle(15, 0.5);
+        TurnForAngle(25, 0.5);
 
         shootBall();
 
-        TurnForAngle(-15, 0.5);
+        TurnForAngle(-25, 0.5);
 
-        driveForDistance(72, 1.0);
-
-        strafeForDistance(36, 1.0, true);
-
-        strafeForDistance(36, 1.0, false);
-
-        driveForDistance(12, 0.5);
+        driveForDistance(60, 1.0);
 
         TurnForAngle(-90, 0.6);
 
         intakeBall();
+
+        driveForDistance(48, 0.8);
+
+        strafeForDistance(48,0.7, false);
+
+        strafeForDistance(48,0.7, true);
 
         driveForDistance(50, 0.6);
 
