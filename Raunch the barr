@@ -10,49 +10,80 @@ public class FlywheelTeleOp extends LinearOpMode {
     private DcMotor flywheelLeft;
     private DcMotor flywheelRight;
 
-    private boolean flywheelOn = false;
+    private boolean fullSpeedOn = false;
+    private boolean halfSpeedOn = false;
+
     private boolean aWasPressed = false;
+    private boolean xWasPressed = false;
 
     @Override
     public void runOpMode() {
 
-        // --- Hardware Mapping ---
-        flywheelLeft  = hardwareMap.get(DcMotor.class, "flywheelLeft");
-        flywheelRight = hardwareMap.get(DcMotor.class, "flywheelRight");
+        // --- Hardware Mapping (matches Control Hub setup) ---
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "port1");   // Port 1
+        flywheelRight = hardwareMap.get(DcMotor.class, "port2");   // Port 2
 
-        // Optional: reverse one motor so they spin the same direction
+        // Reverse right motor so wheels spin together
         flywheelRight.setDirection(DcMotor.Direction.REVERSE);
 
-        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        // Stop sharply when power is zero
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        telemetry.addLine("Ready to launch!");
+        telemetry.addLine("Flywheel TeleOp Ready");
         telemetry.update();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            // -------------------------
-            //  Button A Toggle Logic
-            // -------------------------
-            if (gamepad1.a && !aWasPressed) {
-                flywheelOn = !flywheelOn;   // toggle
-            }
-            aWasPressed = gamepad1.a;
+            // ================================
+            //   FULL POWER (Controller 2 A)
+            // ================================
+            if (gamepad2.a && !aWasPressed) {
+                fullSpeedOn = !fullSpeedOn;
 
-            // -------------------------
-            //  Flywheel Power Control
-            // -------------------------
-            if (flywheelOn) {
+                if (fullSpeedOn) {
+                    halfSpeedOn = false;  // turn off half-speed if full is enabled
+                }
+            }
+            aWasPressed = gamepad2.a;
+
+            // ================================
+            //   HALF POWER (Controller 2 X)
+            // ================================
+            if (gamepad2.x && !xWasPressed) {
+                halfSpeedOn = !halfSpeedOn;
+
+                if (halfSpeedOn) {
+                    fullSpeedOn = false;  // turn off full-speed if half is enabled
+                }
+            }
+            xWasPressed = gamepad2.x;
+
+            // ================================
+            //       Power Output Logic
+            // ================================
+            if (fullSpeedOn) {
                 flywheelLeft.setPower(1.0);
                 flywheelRight.setPower(1.0);
-            } else {
+            }
+            else if (halfSpeedOn) {
+                flywheelLeft.setPower(0.5);
+                flywheelRight.setPower(0.5);
+            }
+            else {
                 flywheelLeft.setPower(0);
                 flywheelRight.setPower(0);
             }
 
-            telemetry.addData("Flywheels", flywheelOn ? "ON" : "OFF");
+            // ================================
+            //           Telemetry
+            // ================================
+            telemetry.addData("Mode",
+                    fullSpeedOn ? "FULL POWER" :
+                    halfSpeedOn ? "HALF POWER" :
+                    "OFF");
             telemetry.update();
         }
     }
