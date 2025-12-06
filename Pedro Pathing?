@@ -1,0 +1,190 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import com.pedropathing.drive.MecanumDrive;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgeneration.Path;
+import com.pedropathing.pathgeneration.PathBuilder;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+@Autonomous(name="Red Far PP Auton", group="Linear")
+public class RedFarPPAuton extends LinearOpMode {
+
+    private MecanumDrive drive;
+
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
+    private DcMotor intake1, intake2;
+    private DcMotor flywheelLeft, flywheelRight;
+
+    private final double FULL_SPEED_RPM = 4500;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        // === HARDWARE MAPPING ===
+        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft   = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight  = hardwareMap.get(DcMotor.class, "backRight");
+
+        intake1 = hardwareMap.get(DcMotor.class, "intake1");
+        intake2 = hardwareMap.get(DcMotor.class, "intake2");
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "flywheelLeft");
+        flywheelRight = hardwareMap.get(DcMotor.class, "flywheelRight");
+
+        // === MOTOR DIRECTIONS ===
+        frontRight.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+        intake1.setDirection(DcMotor.Direction.REVERSE);
+        flywheelRight.setDirection(DcMotor.Direction.REVERSE);
+
+        // === ZERO POWER BEHAVIORS ===
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        // === INITIALIZE PEDRO DRIVE ===
+        drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
+
+        // START POSE (Red Far)
+        drive.setPose(new Pose(60, -36, Math.toRadians(140)));
+
+        telemetry.addLine("6-BALL ULTRA FAST READY WITH BRAKE & TIMED INTAKE");
+        telemetry.update();
+
+        waitForStart();
+        if (isStopRequested()) return;
+
+        // Spin up flywheels
+        preSpinShooter();
+
+        // ============================================================
+        // 1) Shoot preload
+        // ============================================================
+        drive.followPath(splineShootFast());
+        drive.followPath(preciseTurn(138));
+        shootQuick();
+
+        // ============================================================
+        // 2) Intake #1 → Shoot #2
+        // ============================================================
+        timedIntake(splineIntake1(), splineReturnShoot2());
+        drive.followPath(preciseTurn(138));
+        shootQuick();
+
+        // ============================================================
+        // 3) Intake #2 → Shoot #3
+        // ============================================================
+        timedIntake(splineIntake2(), splineReturnShoot3());
+        drive.followPath(preciseTurn(138));
+        shootQuick();
+
+        // ============================================================
+        // 4) Intake #3 → Shoot #4
+        // ============================================================
+        timedIntake(splineIntake3(), splineReturnShoot4());
+        drive.followPath(preciseTurn(138));
+        shootQuick();
+
+        // ============================================================
+        // 5) Intake #4 → Shoot #5
+        // ============================================================
+        timedIntake(splineIntake4(), splineReturnShoot5());
+        drive.followPath(preciseTurn(138));
+        shootQuick();
+
+        // ============================================================
+        // 6) Intake #5 → Shoot #6
+        // ============================================================
+        timedIntake(splineIntake5(), splineReturnShoot6());
+        drive.followPath(preciseTurn(138));
+        shootQuick();
+
+        // ============================================================
+        // PARK
+        // ============================================================
+        drive.followPath(splinePark());
+    }
+
+    // =====================================================================
+    // TIMED INTAKE ALONG PATH
+    // =====================================================================
+    private void timedIntake(Path intakePath, Path returnShootPath) {
+        // Start intake
+        intake1.setPower(-1.0);
+        intake2.setPower(-1.0);
+
+        // Follow intake path
+        drive.followPath(intakePath);
+
+        // Stop intake immediately after reaching ball
+        intake1.setPower(0);
+        intake2.setPower(0);
+
+        // Return to shooting position
+        drive.followPath(returnShootPath);
+    }
+
+    // =====================================================================
+    // SHOOTER METHODS
+    // =====================================================================
+    private void preSpinShooter() {
+        flywheelLeft.setVelocity(FULL_SPEED_RPM);
+        flywheelRight.setVelocity(FULL_SPEED_RPM);
+    }
+
+    private void shootQuick() {
+        ElapsedTime t = new ElapsedTime();
+
+        intake1.setPower(-1.0);
+        intake2.setPower(-1.0);
+
+        while (opModeIsActive() && t.seconds() < 0.90) {}
+
+        intake1.setPower(0);
+        intake2.setPower(0);
+    }
+
+    // =====================================================================
+    // SPLINE PATHS
+    // =====================================================================
+
+    private Path splineShootFast() {
+        return new PathBuilder(drive.getPose())
+                .splineTo(22, 5, Math.toRadians(136))
+                .build();
+    }
+
+    private Path splineIntake1() { return new PathBuilder(drive.getPose()).splineTo(44, -58, Math.toRadians(185)).build(); }
+    private Path splineReturnShoot2() { return new PathBuilder(drive.getPose()).splineTo(23, 4, Math.toRadians(136)).build(); }
+
+    private Path splineIntake2() { return new PathBuilder(drive.getPose()).splineTo(45, -60, Math.toRadians(185)).build(); }
+    private Path splineReturnShoot3() { return new PathBuilder(drive.getPose()).splineTo(23, 5, Math.toRadians(135)).build(); }
+
+    private Path splineIntake3() { return new PathBuilder(drive.getPose()).splineTo(46, -61, Math.toRadians(185)).build(); }
+    private Path splineReturnShoot4() { return new PathBuilder(drive.getPose()).splineTo(23, 6, Math.toRadians(136)).build(); }
+
+    private Path splineIntake4() { return new PathBuilder(drive.getPose()).splineTo(48, -62, Math.toRadians(185)).build(); }
+    private Path splineReturnShoot5() { return new PathBuilder(drive.getPose()).splineTo(22, 6, Math.toRadians(135)).build(); }
+
+    private Path splineIntake5() { return new PathBuilder(drive.getPose()).splineTo(50, -63, Math.toRadians(185)).build(); }
+    private Path splineReturnShoot6() { return new PathBuilder(drive.getPose()).splineTo(22, 7, Math.toRadians(135)).build(); }
+
+    private Path splinePark() { return new PathBuilder(drive.getPose()).splineTo(10, 60, Math.toRadians(90)).build(); }
+
+    // =====================================================================
+    // PRECISION TURN
+    // =====================================================================
+    private Path preciseTurn(double deg) { return new PathBuilder(drive.getPose()).turnTo(Math.toRadians(deg)).build(); }
+}
