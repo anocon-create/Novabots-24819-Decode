@@ -19,14 +19,12 @@ public class FlywheelTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        // --- Hardware Mapping (matches Control Hub setup) ---
+        // --- Hardware Mapping
         flywheelLeft  = hardwareMap.get(DcMotor.class, "port1");   // Port 1
         flywheelRight = hardwareMap.get(DcMotor.class, "port2");   // Port 2
 
-        // Reverse right motor so wheels spin together
         flywheelRight.setDirection(DcMotor.Direction.REVERSE);
 
-        // Stop sharply when power is zero
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
