@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name="Red Encoder Far Auton (Optimized)", group="Linear OpMode")
+@Autonomous(name="Red Encoder Far Auton", group="Linear OpMode")
 public class RedEncoderFarAuton extends LinearOpMode {
 
     // === Drive Motors ===
