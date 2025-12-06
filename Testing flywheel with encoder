@@ -1,0 +1,82 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+@TeleOp(name = "Encoder Flywheel", group = "Competition")
+public class EncoderFlywheel extends LinearOpMode {
+
+    private DcMotor flywheelLeft;
+    private DcMotor flywheelRight;
+
+    private boolean fullSpeedOn = false;
+    private boolean halfSpeedOn = false;
+
+    private boolean aWasPressed = false;
+    private boolean xWasPressed = false;
+
+    // Motor's RPM (6000 RPM max for motors)
+    private final double FULL_SPEED_RPM = 4500;  // Full speed at 75% of max RPM cause 6000 is too fast
+    private final double HALF_SPEED_RPM = 3000;  // Half speed at 3000 RPM
+
+    @Override
+    public void runOpMode() {
+
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "portOne");  
+        flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");  
+
+        flywheelRight.setDirection(DcMotor.Direction.REVERSE);
+
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        telemetry.addLine("Flywheel TeleOp Ready");
+        telemetry.update();
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            if (gamepad2.a && !aWasPressed) {
+                fullSpeedOn = !fullSpeedOn;
+
+                if (fullSpeedOn) {
+                    halfSpeedOn = false;  // turn off half-speed if full is enabled
+                }
+            }
+            aWasPressed = gamepad2.a;
+
+            if (gamepad2.x && !xWasPressed) {
+                halfSpeedOn = !halfSpeedOn;
+
+                if (halfSpeedOn) {
+                    fullSpeedOn = false;  // turn off full-speed if half is enabled
+                }
+            }
+            xWasPressed = gamepad2.x;
+
+            if (fullSpeedOn) {
+                flywheelLeft.setVelocity(FULL_SPEED_RPM);
+                flywheelRight.setVelocity(FULL_SPEED_RPM);
+            }
+            else if (halfSpeedOn) {
+                flywheelLeft.setVelocity(HALF_SPEED_RPM);
+                flywheelRight.setVelocity(HALF_SPEED_RPM);
+            }
+            else {
+                flywheelLeft.setVelocity(0);
+                flywheelRight.setVelocity(0);
+            }
+
+            telemetry.addData("Mode",
+                    fullSpeedOn ? "FULL POWER" :
+                    halfSpeedOn ? "HALF POWER" :
+                    "OFF");
+            telemetry.update();
+        }
+    }
+}
