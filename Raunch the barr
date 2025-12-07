@@ -20,13 +20,14 @@ public class FlywheelTeleOp extends LinearOpMode {
     public void runOpMode() {
 
         // --- Hardware Mapping
-        flywheelLeft  = hardwareMap.get(DcMotor.class, "port1");   // Port 1
-        flywheelRight = hardwareMap.get(DcMotor.class, "port2");   // Port 2
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");
 
         flywheelRight.setDirection(DcMotor.Direction.REVERSE);
 
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake1.setZeroPoweBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         telemetry.addLine("Flywheel TeleOp Ready");
         telemetry.update();
