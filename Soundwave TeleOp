@@ -35,7 +35,7 @@ public class SoundwaveTeleop extends LinearOpMode {
         backRightMotor  = hardwareMap.get(DcMotor.class, "port");
         backLeftMotor   = hardwareMap.get(DcMotor.class, "port");
 
-        intake1 = hardwareMap.get(DcMotor.class, "port");
+        intake1 = hardwareMap.get(DcMotor.class, "portThree");
         intake2 = hardwareMap.get(DcMotor.class, "port");
 
         flywheelLeft  = hardwareMap.get(DcMotor.class, "portOne");
