@@ -50,6 +50,11 @@ public class SoundwaveTeleop extends LinearOpMode {
         flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        flywheelLeft.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake1.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake2.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.FLOAT);
+
         waitForStart();
 
         while (opModeIsActive()) {
@@ -81,6 +86,33 @@ public class SoundwaveTeleop extends LinearOpMode {
                 intake1.setPower(0.0);
                 intake2.setPower(0.0);
             }
+
+            // ------------------------
+            // GAMEPAD 1 SHOOTING ADJUSTMENTS
+            // ------------------------
+                if(gamepad1.x){
+                    frontRight.setPower(1);
+                    backRight.setPower(1);
+                    frontLeft.setPower(-1);
+                    backLeft.setPower(-1);
+                } else {
+                    frontRight.setPower(0);
+                    backRight.setPower(0);
+                    frontLeft.setPower(0);
+                    backLeft.setPower(0);
+                }
+
+                if(gamepad1.b){
+                    frontLeft.setPower(1);
+                    backLeft.setPower(1);
+                    frontRight.setPower(-1);
+                    backLeft.setPower(-1);
+                } else {
+                    frontLeft.setPower(0);
+                    backLeft.setPower(0);
+                    frontRight.setPower(0);
+                    backLeft.setPower(0);
+                }
 
             // -------------------------
             // GAMEPAD 2 FLYWHEELS (setVelocity)
