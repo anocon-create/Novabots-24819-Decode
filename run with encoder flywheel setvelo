@@ -27,7 +27,7 @@ public class RedEncoderFarAuton extends LinearOpMode {
 
     // === Flywheel Constants ===
     private final double FULL_SPEED_RPM = 4500;  // 75% of 6000 RPM
-    private final double HALF_SPEED_RPM = 3000;  // 50% of 6000 RPM
+    private final double HALF_SPEED_RPM = 2250;  // 50% of 4500 RPM
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -37,10 +37,10 @@ public class RedEncoderFarAuton extends LinearOpMode {
         frontRightMotor = hardwareMap.get(DcMotor.class, "port");
         backLeftMotor   = hardwareMap.get(DcMotor.class, "port");
         backRightMotor  = hardwareMap.get(DcMotor.class, "port");
-        intake1 = hardwareMap.get(DcMotor.class, "port");
+        intake1 = hardwareMap.get(DcMotor.class, "portThree");
         intake2 = hardwareMap.get(DcMotor.class, "port");
-        flywheelLeft = hardwareMap.get(DcMotor.class, "port");
-        flywheelRight = hardwareMap.get(DcMotor.class, "port");
+        flywheelLeft = hardwareMap.get(DcMotor.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");
 
         // === Motor Directions ===
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -51,6 +51,7 @@ public class RedEncoderFarAuton extends LinearOpMode {
 
         // === Zero Power Behavior ===
         intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
