@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class SoundwaveTeleop extends LinearOpMode {
 
     // Drive motors
-    private DcMotor frontRightMotor = null;
-    private DcMotor frontLeftMotor = null;
-    private DcMotor backRightMotor = null;
-    private DcMotor backLeftMotor = null;
+    private DcMotor frontRight = null;
+    private DcMotor frontLeft = null;
+    private DcMotor backRight = null;
+    private DcMotor backLeft = null;
 
     // Intake motors
     private DcMotor intake1 = null;
@@ -30,10 +30,10 @@ public class SoundwaveTeleop extends LinearOpMode {
     public void runOpMode() {
 
         // Hardware mapping
-        frontRightMotor = hardwareMap.get(DcMotor.class, "port");
-        frontLeftMotor  = hardwareMap.get(DcMotor.class, "port");
-        backRightMotor  = hardwareMap.get(DcMotor.class, "port");
-        backLeftMotor   = hardwareMap.get(DcMotor.class, "port");
+        frontRight = hardwareMap.get(DcMotor.class, "port");
+        frontLeft = hardwareMap.get(DcMotor.class, "port");
+        backRight = hardwareMap.get(DcMotor.class, "port");
+        backLeft = hardwareMap.get(DcMotor.class, "port");
 
         intake1 = hardwareMap.get(DcMotor.class, "portThree");
         intake2 = hardwareMap.get(DcMotor.class, "port");
@@ -50,10 +50,10 @@ public class SoundwaveTeleop extends LinearOpMode {
         flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        flywheelLeft.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheelRight.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake1.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.FLOAT);
-        intake2.setZeroPowerBehavior.(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         waitForStart();
 
@@ -106,12 +106,12 @@ public class SoundwaveTeleop extends LinearOpMode {
                     frontLeft.setPower(1);
                     backLeft.setPower(1);
                     frontRight.setPower(-1);
-                    backLeft.setPower(-1);
+                    backRight.setPower(-1);
                 } else {
                     frontLeft.setPower(0);
                     backLeft.setPower(0);
                     frontRight.setPower(0);
-                    backLeft.setPower(0);
+                    backRight.setPower(0);
                 }
 
             // -------------------------
