@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "SoundwaveTeleop", group = "Linear OpMode")
+@TeleOp(name = "Soundwave TeleOp", group = "Linear OpMode")
 public class SoundwaveTeleop extends LinearOpMode {
 
     // Drive motors
