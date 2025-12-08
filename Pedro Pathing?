@@ -31,10 +31,10 @@ public class RedFarPPAuton extends LinearOpMode {
         backLeft   = hardwareMap.get(DcMotor.class, "backLeft");
         backRight  = hardwareMap.get(DcMotor.class, "backRight");
 
-        intake1 = hardwareMap.get(DcMotor.class, "intake1");
+        intake1 = hardwareMap.get(DcMotor.class, "portThree");
         intake2 = hardwareMap.get(DcMotor.class, "intake2");
-        flywheelLeft  = hardwareMap.get(DcMotor.class, "flywheelLeft");
-        flywheelRight = hardwareMap.get(DcMotor.class, "flywheelRight");
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");
 
         // === MOTOR DIRECTIONS ===
         frontRight.setDirection(DcMotor.Direction.REVERSE);
@@ -43,10 +43,10 @@ public class RedFarPPAuton extends LinearOpMode {
         flywheelRight.setDirection(DcMotor.Direction.REVERSE);
 
         // === ZERO POWER BEHAVIORS ===
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
