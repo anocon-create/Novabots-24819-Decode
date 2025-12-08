@@ -24,7 +24,7 @@ public class SoundwaveTeleop extends LinearOpMode {
 
     // Full speed and half speed RPM for flywheel
     private final double FULL_SPEED_RPM = 4500;
-    private final double HALF_SPEED_RPM = 3000;
+    private final double HALF_SPEED_RPM = 2250;
 
     @Override
     public void runOpMode() {
