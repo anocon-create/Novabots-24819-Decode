@@ -9,67 +9,73 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class SoundwaveTeleop extends LinearOpMode {
 
     // Drive motors
-    private DcMotor frontRight = null;
-    private DcMotor frontLeft = null;
-    private DcMotor backRight = null;
-    private DcMotor backLeft = null;
+    private DcMotor frontRight, frontLeft, backRight, backLeft;
 
     // Intake motors
-    private DcMotor intake1 = null;
-    private DcMotor intake2 = null;
+    private DcMotor intake1, intake2;
 
     // Flywheel motors
-    private DcMotor flywheelLeft = null;
-    private DcMotor flywheelRight = null;
+    private DcMotor flywheelLeft, flywheelRight;
 
-    // Full speed and half speed RPM for flywheel
+    // Flywheel RPM values
     private final double FULL_SPEED_RPM = 4500;
     private final double HALF_SPEED_RPM = 2250;
 
     @Override
     public void runOpMode() {
 
-        // Hardware mapping (temporary until motors are wired)
-        frontRight = hardwareMap.get(DcMotor.class, "portEXP");
-        frontLeft  = hardwareMap.get(DcMotor.class, "portEXP");
-        backRight  = hardwareMap.get(DcMotor.class, "portEXP");
-        backLeft   = hardwareMap.get(DcMotor.class, "portEXP");
+        // --------------------------------------------------
+        // HARDWARE MAP
+        // --------------------------------------------------
+        frontRight = hardwareMap.get(DcMotor.class, "port");
+        frontLeft  = hardwareMap.get(DcMotor.class, "port");
+        backRight  = hardwareMap.get(DcMotor.class, "port");
+        backLeft   = hardwareMap.get(DcMotor.class, "port");
 
-        intake1 = hardwareMap.get(DcMotor.class, "portThree");
-        intake2 = hardwareMap.get(DcMotor.class, "portZero);
+        intake1 = hardwareMap.get(DcMotor.class, "port");
+        intake2 = hardwareMap.get(DcMotor.class, "port");
 
-        flywheelLeft  = hardwareMap.get(DcMotor.class, "portOne");
-        flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");
+        flywheelLeft  = hardwareMap.get(DcMotor.class, "port");
+        flywheelRight = hardwareMap.get(DcMotor.class, "port");
 
-        // Set motor directions
+        // Motor directions
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake1.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake2.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        // Flywheels use encoders
         flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Zero power behavior
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bakcLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            // -----------------------------------
-            // GAMEPAD 1 DRIVING
-            // -----------------------------------
-            double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x;
-            double turn = gamepad1.right_stick_x;
+            // =====================================================
+            // GAMEPAD 1 — DRIVING
+            // =====================================================
+            double y = -gamepad1.left_stick_y;   // forward/back
+            double x = gamepad1.left_stick_x;    // strafe
+            double turn = gamepad1.right_stick_x * 0.6;  // right-stick turning
+
+            // X → slight left turn override
+            if (gamepad1.x) {
+                turn = -0.5;
+            }
+            // B → slight right turn override
+            else if (gamepad1.b) {
+                turn = 0.5;
+            }
 
             double fl = y + x + turn;
             double fr = y - x - turn;
@@ -81,65 +87,45 @@ public class SoundwaveTeleop extends LinearOpMode {
             backLeft.setPower(bl);
             backRight.setPower(br);
 
-            // -----------------------------------
+            // =====================================================
             // GAMEPAD 1 INTAKE
-            // -----------------------------------
+            // =====================================================
+            double intakeGP1 = 0;
             if (gamepad1.right_trigger > 0.1) {
-                intake1.setPower(-0.8);
-                intake2.setPower(-0.8);
-            } else {
-                intake1.setPower(0.0);
-                intake2.setPower(0.0);
+                intakeGP1 = 0.8;
             }
 
-            // -----------------------------------
-            // GAMEPAD 1 SHOOTING ADJUSTMENTS
-            // -----------------------------------
-            if (gamepad1.x) {
-                // Rotate Left
-                frontRight.setPower(1);
-                backRight.setPower(1);
-                frontLeft.setPower(-1);
-                backLeft.setPower(-1);
-            }
-            else if (gamepad1.b) {
-                // Rotate Right
-                frontLeft.setPower(1);
-                backLeft.setPower(1);
-                frontRight.setPower(-1);
-                backRight.setPower(-1);
-            }
+            // =====================================================
+            // GAMEPAD 2 — SHOOTING
+            // =====================================================
+            double flywheelVel = 0;
+            double intakeGP2 = 0;
 
-            // -----------------------------------
-            // GAMEPAD 2 FLYWHEELS SHOOTER/INTAKE
-            // -----------------------------------
             if (gamepad2.right_trigger > 0.1) {
-                flywheelLeft.setVelocity(FULL_SPEED_RPM);
-                flywheelRight.setVelocity(FULL_SPEED_RPM);
+                flywheelVel = FULL_SPEED_RPM;
+                intakeGP2 = 0.8;
             }
             else if (gamepad2.left_trigger > 0.1) {
-                flywheelLeft.setVelocity(HALF_SPEED_RPM);
-                flywheelRight.setVelocity(HALF_SPEED_RPM);
+                flywheelVel = HALF_SPEED_RPM;
+                intakeGP2 = 0.8;
             }
-            else {
-                flywheelLeft.setVelocity(0);
-                flywheelRight.setVelocity(0);
-                intake1.setPower(0);
-                intake2.setPower(0);
-            }
-           if (gamepad1.left_bumper) {
-                flywheelLeft.setPower(1.0);
-                flywheelRight.setPower(1.0);
-            } 
-            else {
-                // When bumper not pressed → stop both motors
-                flywheelLeft.setPower(0);
-                flywheelRight.setPower(0);
-            }
-            
 
-            telemetry.addData("Flywheel L", flywheelLeft.getVelocity());
-            telemetry.addData("Flywheel R", flywheelRight.getVelocity());
+            flywheelLeft.setVelocity(flywheelVel);
+            flywheelRight.setVelocity(flywheelVel);
+
+            // Choose whichever intake command is stronger
+            double finalIntakePower = Math.max(intakeGP1, intakeGP2);
+
+            intake1.setPower(finalIntakePower);
+            intake2.setPower(finalIntakePower);
+
+            // =====================================================
+            // TELEMETRY
+            // =====================================================
+            telemetry.addData("Flywheel L Velocity", flywheelLeft.getVelocity());
+            telemetry.addData("Flywheel R Velocity", flywheelRight.getVelocity());
+            telemetry.addData("Intake Power", finalIntakePower);
+            telemetry.addData("Turn Input", turn);
             telemetry.update();
         }
     }
