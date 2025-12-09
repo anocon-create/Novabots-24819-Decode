@@ -30,13 +30,13 @@ public class SoundwaveTeleop extends LinearOpMode {
     public void runOpMode() {
 
         // Hardware mapping (temporary until motors are wired)
-        frontRight = hardwareMap.get(DcMotor.class, "port");
-        frontLeft  = hardwareMap.get(DcMotor.class, "port");
-        backRight  = hardwareMap.get(DcMotor.class, "port");
-        backLeft   = hardwareMap.get(DcMotor.class, "port");
+        frontRight = hardwareMap.get(DcMotor.class, "portEXP");
+        frontLeft  = hardwareMap.get(DcMotor.class, "portEXP");
+        backRight  = hardwareMap.get(DcMotor.class, "portEXP");
+        backLeft   = hardwareMap.get(DcMotor.class, "portEXP");
 
         intake1 = hardwareMap.get(DcMotor.class, "portThree");
-        intake2 = hardwareMap.get(DcMotor.class, "port");
+        intake2 = hardwareMap.get(DcMotor.class, "portZero);
 
         flywheelLeft  = hardwareMap.get(DcMotor.class, "portOne");
         flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");
@@ -116,14 +116,10 @@ public class SoundwaveTeleop extends LinearOpMode {
             if (gamepad2.right_trigger > 0.1) {
                 flywheelLeft.setVelocity(FULL_SPEED_RPM);
                 flywheelRight.setVelocity(FULL_SPEED_RPM);
-                intake1.setPower(-1);
-                intake2.setPower(-1);
             }
             else if (gamepad2.left_trigger > 0.1) {
                 flywheelLeft.setVelocity(HALF_SPEED_RPM);
                 flywheelRight.setVelocity(HALF_SPEED_RPM);
-                intake1.setPower(-1);
-                intake2.setPower(-1);
             }
             else {
                 flywheelLeft.setVelocity(0);
@@ -131,6 +127,16 @@ public class SoundwaveTeleop extends LinearOpMode {
                 intake1.setPower(0);
                 intake2.setPower(0);
             }
+           if (gamepad1.left_bumper) {
+                flywheelLeft.setPower(1.0);
+                flywheelRight.setPower(1.0);
+            } 
+            else {
+                // When bumper not pressed → stop both motors
+                flywheelLeft.setPower(0);
+                flywheelRight.setPower(0);
+            }
+            
 
             telemetry.addData("Flywheel L", flywheelLeft.getVelocity());
             telemetry.addData("Flywheel R", flywheelRight.getVelocity());
