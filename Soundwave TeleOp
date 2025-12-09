@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "Soundwave TeleOp", group = "Linear OpMode")
@@ -15,7 +16,7 @@ public class SoundwaveTeleop extends LinearOpMode {
     private DcMotor intake1, intake2;
 
     // Flywheel motors
-    private DcMotor flywheelLeft, flywheelRight;
+    private DcMotorEx flywheelLeft, flywheelRight;
 
     // Flywheel RPM values
     private final double FULL_SPEED_RPM = 4500;
@@ -25,7 +26,7 @@ public class SoundwaveTeleop extends LinearOpMode {
     public void runOpMode() {
 
         // --------------------------------------------------
-        // HARDWARE MAP
+        // HARDWARE MAP (temporary placeholders)
         // --------------------------------------------------
         frontRight = hardwareMap.get(DcMotor.class, "port");
         frontLeft  = hardwareMap.get(DcMotor.class, "port");
@@ -35,8 +36,8 @@ public class SoundwaveTeleop extends LinearOpMode {
         intake1 = hardwareMap.get(DcMotor.class, "port");
         intake2 = hardwareMap.get(DcMotor.class, "port");
 
-        flywheelLeft  = hardwareMap.get(DcMotor.class, "port");
-        flywheelRight = hardwareMap.get(DcMotor.class, "port");
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "port");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "port");
 
         // Motor directions
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -45,9 +46,11 @@ public class SoundwaveTeleop extends LinearOpMode {
         intake1.setDirection(DcMotorSimple.Direction.REVERSE);
         intake2.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        // Flywheels with encoders
         flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        // Zero power behavior
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -55,7 +58,7 @@ public class SoundwaveTeleop extends LinearOpMode {
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        bakcLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         waitForStart();
 
@@ -68,12 +71,10 @@ public class SoundwaveTeleop extends LinearOpMode {
             double x = gamepad1.left_stick_x;    // strafe
             double turn = gamepad1.right_stick_x * 0.6;  // right-stick turning
 
-            // X → slight left turn override
+            // X/B → slight turn override
             if (gamepad1.x) {
                 turn = -0.5;
-            }
-            // B → slight right turn override
-            else if (gamepad1.b) {
+            } else if (gamepad1.b) {
                 turn = 0.5;
             }
 
@@ -96,7 +97,7 @@ public class SoundwaveTeleop extends LinearOpMode {
             }
 
             // =====================================================
-            // GAMEPAD 2 — SHOOTING
+            // GAMEPAD 2 — SHOOTING & INTAKE
             // =====================================================
             double flywheelVel = 0;
             double intakeGP2 = 0;
@@ -104,8 +105,7 @@ public class SoundwaveTeleop extends LinearOpMode {
             if (gamepad2.right_trigger > 0.1) {
                 flywheelVel = FULL_SPEED_RPM;
                 intakeGP2 = 0.8;
-            }
-            else if (gamepad2.left_trigger > 0.1) {
+            } else if (gamepad2.left_trigger > 0.1) {
                 flywheelVel = HALF_SPEED_RPM;
                 intakeGP2 = 0.8;
             }
@@ -113,7 +113,7 @@ public class SoundwaveTeleop extends LinearOpMode {
             flywheelLeft.setVelocity(flywheelVel);
             flywheelRight.setVelocity(flywheelVel);
 
-            // Choose whichever intake command is stronger
+            // Use the stronger intake input
             double finalIntakePower = Math.max(intakeGP1, intakeGP2);
 
             intake1.setPower(finalIntakePower);
