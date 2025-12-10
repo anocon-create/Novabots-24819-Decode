@@ -27,7 +27,7 @@ public class RedFarPPAuton extends LinearOpMode {
     private DcMotorEx flywheelLeft, flywheelRight;
 
     // Full RPM for shooting
-    private final double FULL_SPEED_RPM = 4500;
+    private final double FULL_SPEED_RPM = 800;
 
     @Override
     public void runOpMode() throws InterruptedException {
