@@ -9,6 +9,7 @@ import com.pedropathing.pathgeneration.Path;
 import com.pedropathing.pathgeneration.PathBuilder;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="Red Far PP Auton", group="Linear")
@@ -16,33 +17,50 @@ public class RedFarPPAuton extends LinearOpMode {
 
     private MecanumDrive drive;
 
+    // Drive motors
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-    private DcMotor intake1, intake2;
-    private DcMotor flywheelLeft, flywheelRight;
 
+    // Intake motors
+    private DcMotor intake1, intake2;
+
+    // Flywheels (MUST be DcMotorEx for velocity)
+    private DcMotorEx flywheelLeft, flywheelRight;
+
+    // Full RPM for shooting
     private final double FULL_SPEED_RPM = 4500;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        // === HARDWARE MAPPING ===
-        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft   = hardwareMap.get(DcMotor.class, "backLeft");
-        backRight  = hardwareMap.get(DcMotor.class, "backRight");
+        // ============================================================
+        // HARDWARE MAP — PLACEHOLDER "port" (you will rename later)
+        // ============================================================
+        frontLeft  = hardwareMap.get(DcMotor.class, "port");
+        frontRight = hardwareMap.get(DcMotor.class, "port");
+        backLeft   = hardwareMap.get(DcMotor.class, "port");
+        backRight  = hardwareMap.get(DcMotor.class, "port");
 
-        intake1 = hardwareMap.get(DcMotor.class, "portThree");
-        intake2 = hardwareMap.get(DcMotor.class, "intake2");
-        flywheelLeft  = hardwareMap.get(DcMotor.class, "portOne");
-        flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");
+        intake1 = hardwareMap.get(DcMotor.class, "port");
+        intake2 = hardwareMap.get(DcMotor.class, "port");
 
-        // === MOTOR DIRECTIONS ===
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "port");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "port");
+
+        // ============================================================
+        // MOTOR DIRECTIONS
+        // ============================================================
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.REVERSE);
+
+        // Same as TeleOp: intake reversed
         intake1.setDirection(DcMotor.Direction.REVERSE);
+        intake2.setDirection(DcMotor.Direction.REVERSE);
+
         flywheelRight.setDirection(DcMotor.Direction.REVERSE);
 
-        // === ZERO POWER BEHAVIORS ===
+        // ============================================================
+        // ZERO POWER BEHAVIOR
+        // ============================================================
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -54,90 +72,82 @@ public class RedFarPPAuton extends LinearOpMode {
         intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        // === INITIALIZE PEDRO DRIVE ===
+        // ============================================================
+        // ENCODER MODE FOR FLYWHEELS
+        // ============================================================
+        flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // ============================================================
+        // INITIALIZE PEDRO MECHANUM DRIVE
+        // ============================================================
         drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
 
-        // START POSE (Red Far)
         drive.setPose(new Pose(60, -36, Math.toRadians(140)));
 
-        telemetry.addLine("6-BALL ULTRA FAST READY WITH BRAKE & TIMED INTAKE");
+        telemetry.addLine("Red Far PP Auton READY");
         telemetry.update();
 
         waitForStart();
         if (isStopRequested()) return;
 
-        // Spin up flywheels
+        // ------------------------------------------------------------
+        // PRE-SPIN SHOOTER
+        // ------------------------------------------------------------
         preSpinShooter();
 
-        // ============================================================
-        // 1) Shoot preload
-        // ============================================================
+        // ------------------------------------------------------------
+        // SEQUENCE: Shoot → Intake → Shoot ... etc
+        // ------------------------------------------------------------
+
         drive.followPath(splineShootFast());
         drive.followPath(preciseTurn(138));
         shootQuick();
 
-        // ============================================================
-        // 2) Intake #1 → Shoot #2
-        // ============================================================
         timedIntake(splineIntake1(), splineReturnShoot2());
         drive.followPath(preciseTurn(138));
         shootQuick();
 
-        // ============================================================
-        // 3) Intake #2 → Shoot #3
-        // ============================================================
         timedIntake(splineIntake2(), splineReturnShoot3());
         drive.followPath(preciseTurn(138));
         shootQuick();
 
-        // ============================================================
-        // 4) Intake #3 → Shoot #4
-        // ============================================================
         timedIntake(splineIntake3(), splineReturnShoot4());
         drive.followPath(preciseTurn(138));
         shootQuick();
 
-        // ============================================================
-        // 5) Intake #4 → Shoot #5
-        // ============================================================
         timedIntake(splineIntake4(), splineReturnShoot5());
         drive.followPath(preciseTurn(138));
         shootQuick();
 
-        // ============================================================
-        // 6) Intake #5 → Shoot #6
-        // ============================================================
         timedIntake(splineIntake5(), splineReturnShoot6());
         drive.followPath(preciseTurn(138));
         shootQuick();
 
-        // ============================================================
+        // ------------------------------------------------------------
         // PARK
-        // ============================================================
+        // ------------------------------------------------------------
         drive.followPath(splinePark());
     }
 
     // =====================================================================
-    // TIMED INTAKE ALONG PATH
+    // TIMED INTAKE ALONG A PATH
     // =====================================================================
     private void timedIntake(Path intakePath, Path returnShootPath) {
-        // Start intake
+
         intake1.setPower(-1.0);
         intake2.setPower(-1.0);
 
-        // Follow intake path
         drive.followPath(intakePath);
 
-        // Stop intake immediately after reaching ball
         intake1.setPower(0);
         intake2.setPower(0);
 
-        // Return to shooting position
         drive.followPath(returnShootPath);
     }
 
     // =====================================================================
-    // SHOOTER METHODS
+    // SHOOTING HELPERS
     // =====================================================================
     private void preSpinShooter() {
         flywheelLeft.setVelocity(FULL_SPEED_RPM);
@@ -150,16 +160,15 @@ public class RedFarPPAuton extends LinearOpMode {
         intake1.setPower(-1.0);
         intake2.setPower(-1.0);
 
-        while (opModeIsActive() && t.seconds() < 0.90) {}
+        while (opModeIsActive() && t.seconds() < 0.9) {}
 
         intake1.setPower(0);
         intake2.setPower(0);
     }
 
     // =====================================================================
-    // SPLINE PATHS
+    // PATHS (unchanged)
     // =====================================================================
-
     private Path splineShootFast() {
         return new PathBuilder(drive.getPose())
                 .splineTo(22, 5, Math.toRadians(136))
@@ -186,5 +195,9 @@ public class RedFarPPAuton extends LinearOpMode {
     // =====================================================================
     // PRECISION TURN
     // =====================================================================
-    private Path preciseTurn(double deg) { return new PathBuilder(drive.getPose()).turnTo(Math.toRadians(deg)).build(); }
+    private Path preciseTurn(double deg) {
+        return new PathBuilder(drive.getPose())
+                .turnTo(Math.toRadians(deg))
+                .build();
+    }
 }
