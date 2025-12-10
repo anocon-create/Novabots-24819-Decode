@@ -1,0 +1,187 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import com.pedropathing.drive.MecanumDrive;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgeneration.Path;
+import com.pedropathing.pathgeneration.PathBuilder;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+@Autonomous(name="Blue Far PP Auton", group="Linear")
+public class BlueFarPPAuton extends LinearOpMode {
+
+    private MecanumDrive drive;
+
+    // Drive motors
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
+
+    // Intake motors
+    private DcMotor intake1, intake2;
+
+    // Flywheels (DcMotorEx so velocity works)
+    private DcMotorEx flywheelLeft, flywheelRight;
+
+    private final double FULL_SPEED_RPM = 800;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        // === HARDWARE (placeholder names) ===
+        frontLeft  = hardwareMap.get(DcMotor.class, "port");
+        frontRight = hardwareMap.get(DcMotor.class, "port");
+        backLeft   = hardwareMap.get(DcMotor.class, "port");
+        backRight  = hardwareMap.get(DcMotor.class, "port");
+
+        intake1 = hardwareMap.get(DcMotor.class, "port");
+        intake2 = hardwareMap.get(DcMotor.class, "port");
+
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "port");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "port");
+
+        // === MOTOR DIRECTIONS ===
+        frontRight.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+        intake1.setDirection(DcMotor.Direction.REVERSE);
+        intake2.setDirection(DcMotor.Direction.REVERSE);
+        flywheelRight.setDirection(DcMotor.Direction.REVERSE);
+
+        // === ZERO POWER BEHAVIOR ===
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // === PEDRO DRIVE ===
+        drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
+
+        // MIRRORED START POSE (Red: x=60 → Blue: x=-60)
+        drive.setPose(new Pose(-60, -36, Math.toRadians(40)));   
+        // Reason: 180 - 140 = 40° mirror
+
+        telemetry.addLine("Blue Far PP Auton READY");
+        telemetry.update();
+
+        waitForStart();
+        if (isStopRequested()) return;
+
+        preSpinShooter();
+
+        // SAME SEQUENCE, MIRRORED PATHS
+        drive.followPath(splineShootFast());
+        drive.followPath(preciseTurn(42));   // 180 - 138 = 42°
+        shootQuick();
+
+        timedIntake(splineIntake1(), splineReturnShoot2());
+        drive.followPath(preciseTurn(42));
+        shootQuick();
+
+        timedIntake(splineIntake2(), splineReturnShoot3());
+        drive.followPath(preciseTurn(42));
+        shootQuick();
+
+        timedIntake(splineIntake3(), splineReturnShoot4());
+        drive.followPath(preciseTurn(42));
+        shootQuick();
+
+        timedIntake(splineIntake4(), splineReturnShoot5());
+        drive.followPath(preciseTurn(42));
+        shootQuick();
+
+        timedIntake(splineIntake5(), splineReturnShoot6());
+        drive.followPath(preciseTurn(42));
+        shootQuick();
+
+        drive.followPath(splinePark());
+    }
+
+    // =====================================================================
+    // TIMED INTAKE
+    // =====================================================================
+    private void timedIntake(Path intakePath, Path returnShootPath) {
+        intake1.setPower(-1.0);
+        intake2.setPower(-1.0);
+
+        drive.followPath(intakePath);
+
+        intake1.setPower(0);
+        intake2.setPower(0);
+
+        drive.followPath(returnShootPath);
+    }
+
+    private void preSpinShooter() {
+        flywheelLeft.setVelocity(FULL_SPEED_RPM);
+        flywheelRight.setVelocity(FULL_SPEED_RPM);
+    }
+
+    private void shootQuick() {
+        ElapsedTime t = new ElapsedTime();
+
+        intake1.setPower(-1.0);
+        intake2.setPower(-1.0);
+
+        while (opModeIsActive() && t.seconds() < 0.9) {}
+
+        intake1.setPower(0);
+        intake2.setPower(0);
+    }
+
+    // =====================================================================
+    // MIRRORED PATHS
+    // =====================================================================
+
+    // Red: splineTo(22, 5, 136°)
+    // Blue mirror: x → -22, heading → 180-136 = 44°
+    private Path splineShootFast() {
+        return new PathBuilder(drive.getPose())
+                .splineTo(-22, 5, Math.toRadians(44))
+                .build();
+    }
+
+    // MIRRORING RULE:
+    // Red point (x, y, θ) → Blue (-x, y, 180° - θ)
+
+    private Path splineIntake1() { return new PathBuilder(drive.getPose()).splineTo(-44, -58, Math.toRadians(-5)).build(); }
+    private Path splineReturnShoot2() { return new PathBuilder(drive.getPose()).splineTo(-23, 4, Math.toRadians(44)).build(); }
+
+    private Path splineIntake2() { return new PathBuilder(drive.getPose()).splineTo(-45, -60, Math.toRadians(-5)).build(); }
+    private Path splineReturnShoot3() { return new PathBuilder(drive.getPose()).splineTo(-23, 5, Math.toRadians(45)).build(); }
+
+    private Path splineIntake3() { return new PathBuilder(drive.getPose()).splineTo(-46, -61, Math.toRadians(-5)).build(); }
+    private Path splineReturnShoot4() { return new PathBuilder(drive.getPose()).splineTo(-23, 6, Math.toRadians(44)).build(); }
+
+    private Path splineIntake4() { return new PathBuilder(drive.getPose()).splineTo(-48, -62, Math.toRadians(-5)).build(); }
+    private Path splineReturnShoot5() { return new PathBuilder(drive.getPose()).splineTo(-22, 6, Math.toRadians(45)).build(); }
+
+    private Path splineIntake5() { return new PathBuilder(drive.getPose()).splineTo(-50, -63, Math.toRadians(-5)).build(); }
+    private Path splineReturnShoot6() { return new PathBuilder(drive.getPose()).splineTo(-22, 7, Math.toRadians(45)).build(); }
+
+    // Red: (10, 60, 90°)
+    // Blue: (-10, 60, 180 - 90 = 90°)
+    private Path splinePark() { return new PathBuilder(drive.getPose()).splineTo(-10, 60, Math.toRadians(90)).build(); }
+
+    // ============================================================
+    // MIRRORED TURN
+    // ============================================================
+    private Path preciseTurn(double degRed) {
+        // Blue = 180° - redAngle
+        double degBlue = 180 - degRed;
+        return new PathBuilder(drive.getPose())
+                .turnTo(Math.toRadians(degBlue))
+                .build();
+    }
+}
