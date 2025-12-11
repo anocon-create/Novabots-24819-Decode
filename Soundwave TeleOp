@@ -13,38 +13,39 @@ public class SoundwaveTeleop extends LinearOpMode {
     private DcMotor frontRight, frontLeft, backRight, backLeft;
 
     // Intake motors
-    private DcMotor intake1, intake2;
+    private DcMotor intake1;
+    private boolean intake2 = false;
+    private boolean right_bumperWasPressed = false;
 
     // Flywheel motors
     private DcMotorEx flywheelLeft, flywheelRight;
 
     // Flywheel RPM values
-    private final double FULL_SPEED_RPM = 4500;
-    private final double HALF_SPEED_RPM = 2250;
+    private final double FULL_SPEED_RPM = 850;
+    private final double HALF_SPEED_RPM = 550;
 
     @Override
     public void runOpMode() {
 
         // --------------------------------------------------
-        // HARDWARE MAP (temporary placeholders)
+        // HARDWARE MAP
         // --------------------------------------------------
-        frontRight = hardwareMap.get(DcMotor.class, "port");
-        frontLeft  = hardwareMap.get(DcMotor.class, "port");
-        backRight  = hardwareMap.get(DcMotor.class, "port");
-        backLeft   = hardwareMap.get(DcMotor.class, "port");
+        frontRight = hardwareMap.get(DcMotor.class, "portTwoEXP");
+        frontLeft  = hardwareMap.get(DcMotor.class, "portTwo");
+        backRight  = hardwareMap.get(DcMotor.class, "portThreeEXP");
+        backLeft   = hardwareMap.get(DcMotor.class, "portThree");
 
-        intake1 = hardwareMap.get(DcMotor.class, "port");
-        intake2 = hardwareMap.get(DcMotor.class, "port");
+        intake1 = hardwareMap.get(DcMotor.class, "portZero");
+        intake2 = hardwareMap.get(DcMotor.class, "portZeroEXP");
 
-        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "port");
-        flywheelRight = hardwareMap.get(DcMotorEx.class, "port");
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "portOneEXP");
 
         // Motor directions
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
         flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
         intake1.setDirection(DcMotorSimple.Direction.REVERSE);
-        intake2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Flywheels with encoders
         flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -95,6 +96,15 @@ public class SoundwaveTeleop extends LinearOpMode {
             if (gamepad1.right_trigger > 0.1) {
                 intakeGP1 = 0.8;
             }
+
+            // =====================================================
+            // GAMEPAD 1 CONTINUOUS INTAKE
+            // =====================================================
+            double intakeGP1 = 0;
+            if (gamepad1.right_bumper) {
+            intake1.setPower(-4);
+            } else {
+            intake1.setPower(0);
 
             // =====================================================
             // GAMEPAD 2 — SHOOTING & INTAKE
