@@ -34,9 +34,9 @@ public class SoundwaveTeleop extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        // --------------------------------------------------
+        // ==================================================
         // HARDWARE MAP
-        // --------------------------------------------------
+        // ==================================================
         frontRight = hardwareMap.get(DcMotor.class, "portTwoEXP");
         frontLeft  = hardwareMap.get(DcMotor.class, "portTwo");
         backRight  = hardwareMap.get(DcMotor.class, "portThreeEXP");
@@ -49,14 +49,14 @@ public class SoundwaveTeleop extends LinearOpMode {
         flywheelRight = hardwareMap.get(DcMotorEx.class, "portOneEXP");
 
         // Servo
-        myServo = hardwareMap.get(Servo.class, "myServo");
+        myServo = hardwareMap.get(Servo.class, "servoZero");
 
         // Always start servo at known position
         myServo.setPosition(startPosition);
 
-        // --------------------------------------------------
+        // ==================================================
         // MOTOR DIRECTIONS
-        // --------------------------------------------------
+        // ==================================================
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -71,9 +71,9 @@ public class SoundwaveTeleop extends LinearOpMode {
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
-        // --------------------------------------------------
+        // ==================================================
         // ZERO POWER BEHAVIOR
-        // --------------------------------------------------
+        // ==================================================
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -88,23 +88,44 @@ public class SoundwaveTeleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             // =====================================================
-            // GAMEPAD 2 — SERVO
-            // =====================================================
-            if (gamepad2.x) {
-                myServo.setPosition(outPosition);
-            } else {
-                myServo.setPosition(startPosition);
-            }
-
-            // =====================================================
             // GAMEPAD 1 — DRIVING
             // =====================================================
             double y = gamepad1.left_stick_y;
             double x = -gamepad1.left_stick_x;
             double turn = -gamepad1.right_stick_x * 0.6;
 
-            if (gamepad1.x) turn = -0.5;
-            if (gamepad1.b) turn = 0.5;
+            // =====================================================
+            // ADJUSMTENTS FOR SHOOTING (STRAFE RIGHT)
+            // =====================================================
+            if (gamepad1.dpad_left) {
+            double strafePower = 0.6;
+            frontLeft.setPower(-strafePower);
+            backLeft.setPower(strafePower);
+            frontRight.setPower(strafePower);
+            backRight.setPower(-strafePower);
+            continue;   
+        }
+
+            // ====================================================
+            // ADJUSTMENTS FOR SHOOTING (STRAFE RIGHT)
+            // ====================================================
+            if (gamepad1.dpad_right) {
+            double strafePower = 0.6;
+            frontLeft.setPower(strafePower);
+            backLeft.setPower(-strafePower);
+            frontRight.setPower(-strafePower);
+            backRight.setPower(strafePower);
+            continue;
+        }
+
+            // ====================================================
+            // ADJUSTMENTS FOR SHOOTING (ROTATE)
+            // ====================================================
+            if (gamepad1.x) {
+                turn = -0.5;
+            } else if (gamepad1.b) {
+                turn = 0.5;
+            }
 
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(turn), 1);
             double fl = (y + x + turn) / denominator;
@@ -125,9 +146,6 @@ public class SoundwaveTeleop extends LinearOpMode {
             if (gamepad1.right_trigger > 0.1)
                 intakeGP1 = 1;
 
-            if (gamepad1.right_bumper)
-                intakeGP1 = 1;
-
             // =====================================================
             // GAMEPAD 2 — FLYWHEELS
             // =====================================================
@@ -139,12 +157,29 @@ public class SoundwaveTeleop extends LinearOpMode {
                 flywheelVel = HALF_SPEED_RPM;
             }
 
+            // =====================================================
+            // GAMEPAD 2 — INTAKE FOR SHOOTING
+            // =====================================================
+            double intakeGP1 = 0;
+
+            if (gamepad2.a)
+                intakeGP1 = 1;
+
             flywheelLeft.setVelocity(flywheelVel);
             flywheelRight.setVelocity(flywheelVel);
 
             double finalIntakePower = Math.max(intakeGP1, intakeGP2);
             intake1.setPower(finalIntakePower);
             intake2.setPower(finalIntakePower);
+
+            // =====================================================
+            // GAMEPAD 2 — SERVO
+            // =====================================================
+            if (gamepad2.x) {
+                myServo.setPosition(outPosition);
+            } else {
+                myServo.setPosition(startPosition);
+            }
 
             // =====================================================
             // TELEMETRY
