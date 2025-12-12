@@ -88,9 +88,9 @@ public class SoundwaveTeleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             // =====================================================
-            // GAMEPAD 1 — SERVO
+            // GAMEPAD 2 — SERVO
             // =====================================================
-            if (gamepad1.left_trigger > 0.1) {
+            if (gamepad2.x) {
                 myServo.setPosition(outPosition);
             } else {
                 myServo.setPosition(startPosition);
