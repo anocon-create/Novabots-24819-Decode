@@ -28,8 +28,8 @@ public class SoundwaveTeleop extends LinearOpMode {
     double outPosition   = 0.10;   // down position when trigger is held
 
     // Flywheel speeds
-    private final double FULL_SPEED_RPM = 1067;
-    private final double HALF_SPEED_RPM = 950;
+    private final double FULL_SPEED_RPM = 1000;
+    private final double HALF_SPEED_RPM = 875;
 
     @Override
     public void runOpMode() {
@@ -70,7 +70,10 @@ public class SoundwaveTeleop extends LinearOpMode {
         flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Zero power behavior
+
+        // --------------------------------------------------
+        // ZERO POWER BEHAVIOR
+        // --------------------------------------------------
         flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -85,7 +88,7 @@ public class SoundwaveTeleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             // =====================================================
-            // GAMEPAD 1 — SIMPLE TRIGGER-HELD SERVO CONTROL
+            // GAMEPAD 1 — SERVO
             // =====================================================
             if (gamepad1.left_trigger > 0.1) {
                 myServo.setPosition(outPosition);
@@ -126,17 +129,14 @@ public class SoundwaveTeleop extends LinearOpMode {
                 intakeGP1 = 1;
 
             // =====================================================
-            // GAMEPAD 2 — FLYWHEELS & INTAKE
+            // GAMEPAD 2 — FLYWHEELS
             // =====================================================
             double flywheelVel = 0;
-            double intakeGP2 = 0;
 
             if (gamepad2.right_trigger > 0.1) {
                 flywheelVel = FULL_SPEED_RPM;
-                intakeGP2 = 1;
             } else if (gamepad2.left_trigger > 0.1) {
                 flywheelVel = HALF_SPEED_RPM;
-                intakeGP2 = 1;
             }
 
             flywheelLeft.setVelocity(flywheelVel);
