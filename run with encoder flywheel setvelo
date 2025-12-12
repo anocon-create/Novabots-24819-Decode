@@ -4,43 +4,54 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @Autonomous(name="Red Encoder Far Auton", group="Linear OpMode")
 public class RedEncoderFarAuton extends LinearOpMode {
 
     // === Drive Motors ===
-    private DcMotor frontLeftMotor  = null;
-    private DcMotor frontRightMotor = null;
-    private DcMotor backLeftMotor   = null;
-    private DcMotor backRightMotor  = null;
-    private DcMotor intake1 = null;
-    private DcMotor intake2 = null;
-    private DcMotor flywheelLeft = null;
-    private DcMotor flywheelRight = null;
+    private DcMotor frontLeftMotor;
+    private DcMotor frontRightMotor;
+    private DcMotor backLeftMotor;
+    private DcMotor backRightMotor;
 
-    // === Encoder Constants ===
+    // === Other Motors ===
+    private DcMotor intake1;
+    private DcMotor intake2;
+    private DcMotor flywheelLeft;
+    private DcMotor flywheelRight;
+
+    // === Servo (Gate) ===
+    private Servo myServo;
+    private final double startPosition = 0.60; // gate closed
+    private final double outPosition = 0.10;   // gate open
+
+    // === Encoder / Drive Constants ===
     public static final double COUNTS_PER_REV = 580.4;
     public static final double WHEEL_DIAMETER_INCHES = 3.78;
     public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER_INCHES;
     public static final double TICKS_PER_INCH = COUNTS_PER_REV / WHEEL_CIRCUMFERENCE;
 
     // === Flywheel Constants ===
-    private final double FULL_SPEED_RPM = 4500;  // 75% of 6000 RPM
-    private final double HALF_SPEED_RPM = 2250;  // 50% of 4500 RPM
+    private final double FULL_SPEED_RPM = 1000;
+    private final double HALF_SPEED_RPM = 850;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         // === Hardware Mapping ===
-        frontLeftMotor  = hardwareMap.get(DcMotor.class, "port");
-        frontRightMotor = hardwareMap.get(DcMotor.class, "port");
-        backLeftMotor   = hardwareMap.get(DcMotor.class, "port");
-        backRightMotor  = hardwareMap.get(DcMotor.class, "port");
-        intake1 = hardwareMap.get(DcMotor.class, "portThree");
-        intake2 = hardwareMap.get(DcMotor.class, "port");
+        frontLeftMotor  = hardwareMap.get(DcMotor.class, "portTwo");
+        frontRightMotor = hardwareMap.get(DcMotor.class, "portTwoEXP");
+        backLeftMotor   = hardwareMap.get(DcMotor.class, "portThree");
+        backRightMotor  = hardwareMap.get(DcMotor.class, "portThreeEXP");
+        intake1 = hardwareMap.get(DcMotor.class, "portZero");
+        intake2 = hardwareMap.get(DcMotor.class, "portZeroEXP");
         flywheelLeft = hardwareMap.get(DcMotor.class, "portOne");
-        flywheelRight = hardwareMap.get(DcMotor.class, "portTwo");
+        flywheelRight = hardwareMap.get(DcMotor.class, "portOneEXP");
+        myServo = hardwareMap.get(Servo.class, "myServo");
+
+        // === Set initial servo position ===
+        myServo.setPosition(startPosition);
 
         // === Motor Directions ===
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -50,19 +61,19 @@ public class RedEncoderFarAuton extends LinearOpMode {
         flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // === Zero Power Behavior ===
-        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        intake2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheelLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheelRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // === Reset Encoders ===
         resetEncoders();
 
-        // === Set flywheel to run using encoder (for velocity control) ===
+        // === Flywheels run using encoder for velocity control ===
         flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -72,62 +83,35 @@ public class RedEncoderFarAuton extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        // === AUTON START ===
-
-        shootBall();
+        // === AUTON SEQUENCE ===
+        shootThreeArtifacts();
 
         TurnForAngle(-45, 0.5);
-
         strafeAndRotate(0.6, 0.3, 1.0);
-
         intakeBall();
-
         strafeAndRotate(-0.7, 0.3, 0.75);
-
-        shootBall();
-
+        shootThreeArtifacts();
         strafeAndRotate(0.7, -0.6, 1.0);
-
         intakeBall();
-
         TurnForAngle(90, 0.7);
-
         driveForDistance(12, 0.6);
-
         strafeForDistance(18, 0.7, true);
-
         strafeAndRotate(-0.7, 0.6, 1.0);
-
-        shootBall();
-
+        shootThreeArtifacts();
         strafeAndRotate(0.6, 0.5, 0.75);
-
         intakeBall();
-
         driveAndTurn(0.6, -0.5, 0.75);
-
-        shootBall();
-
+        shootThreeArtifacts();
         TurnForAngle(30, 0.6);
-
         driveForDistance(36, 0.7);
-
         TurnForAngle(90, 0.6);
-
         intakeBall();
-
         strafeAndRotate(0.6, 0.6, 0.8);
-
-        shootBall();
-
+        shootThreeArtifacts();
         strafeAndRotate(0.8, 0.6, 0.75);
-
         intakeBall();
-
         strafeAndRotate(0.6, 0.6, 0.8);
-
-        shootBall();
-
+        shootThreeArtifacts();
         driveForDistance(36, 0.7);
 
         stopMotors();
@@ -146,29 +130,40 @@ public class RedEncoderFarAuton extends LinearOpMode {
         backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    // === Shoot Ball ===
-    public void shootBall() {
-        ElapsedTime t = new ElapsedTime();
+    // === Shoot 3 Artifacts with servo gate ===
+    public void shootThreeArtifacts() {
 
-        flywheelLeft.setVelocity(FULL_SPEED_RPM);  // Full speed at 4500 RPM
-        flywheelRight.setVelocity(FULL_SPEED_RPM); // Full speed at 4500 RPM
-        intake1.setPower(-0.8);
-        intake2.setPower(-0.8);
-        while (opModeIsActive() && t.seconds() < 1.5) {}
+        // 1. Spin up flywheels
+        flywheelLeft.setVelocity(FULL_SPEED_RPM);
+        flywheelRight.setVelocity(FULL_SPEED_RPM);
 
-        intake1.setPower(0);
-        intake2.setPower(0);
-        flywheelLeft.setVelocity(0);   // Stop flywheel
-        flywheelRight.setVelocity(0);  // Stop flywheel
+        // 2. Keep gate closed while spin-up
+        myServo.setPosition(startPosition);
+        sleep(1200); // adjust spin-up time as needed
+
+        // 3. Open gate
+        myServo.setPosition(outPosition);
+
+        // 4. Feed 3 artifacts with intake
+        for (int i = 0; i < 3; i++) {
+            intake1.setPower(-0.9);
+            intake2.setPower(-0.9);
+            sleep(500); // time to feed one artifact
+            intake1.setPower(0);
+            intake2.setPower(0);
+            sleep(150); // small delay between artifacts
+        }
+
+        // 5. Close gate
+        myServo.setPosition(startPosition);
+
+        // 6. Stop flywheels
+        flywheelLeft.setVelocity(0);
+        flywheelRight.setVelocity(0);
     }
 
     // === Intake ===
     public void intakeBall() {
-        ElapsedTime t = new ElapsedTime();
-
-        while (opModeIsActive() && t.seconds() < 0.1) {}
-
-        t.reset();
         frontLeftMotor.setPower(-0.6);
         frontRightMotor.setPower(-0.6);
         backLeftMotor.setPower(-0.6);
@@ -176,17 +171,16 @@ public class RedEncoderFarAuton extends LinearOpMode {
         intake1.setPower(-0.8);
         intake2.setPower(-0.8);
 
-        while (opModeIsActive() && t.seconds() < 1.0) {}
+        sleep(1000); // run intake while moving
 
         stopMotors();
         intake1.setPower(0);
         intake2.setPower(0);
 
-        t.reset();
-        while (opModeIsActive() && t.seconds() < 0.2) {}
+        sleep(200);
     }
 
-    // === Turning ===
+    // === Turn For Angle ===
     public void TurnForAngle(double angleDegrees, double power) {
         double TRACK_WIDTH = 21.3028;
         double turnInches = Math.PI * TRACK_WIDTH * (angleDegrees / 360.0);
@@ -208,5 +202,123 @@ public class RedEncoderFarAuton extends LinearOpMode {
         backRightMotor.setPower(power);
 
         while (opModeIsActive() &&
-                frontLeftMotor.isBusy() && frontRightMotor.isBusy() &&
-                backLeftMotor.isBusy()
+               frontLeftMotor.isBusy() && frontRightMotor.isBusy() &&
+               backLeftMotor.isBusy() && backRightMotor.isBusy()) {
+            // wait
+        }
+
+        stopMotors();
+    }
+
+    // === Strafe and rotate (mecanum) ===
+    public void strafeAndRotate(double x, double y, double turnPower) {
+        double fl = y + x + turnPower;
+        double fr = y - x - turnPower;
+        double bl = y - x + turnPower;
+        double br = y + x - turnPower;
+
+        // normalize
+        double max = Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(bl), Math.abs(br)));
+        if (max > 1.0) {
+            fl /= max;
+            fr /= max;
+            bl /= max;
+            br /= max;
+        }
+
+        frontLeftMotor.setPower(fl);
+        frontRightMotor.setPower(fr);
+        backLeftMotor.setPower(bl);
+        backRightMotor.setPower(br);
+
+        sleep( (long)(1000) ); // adjust time if needed
+        stopMotors();
+    }
+
+    // === Drive straight with encoders ===
+    public void driveForDistance(double inches, double power) {
+        int targetTicks = (int)(inches * TICKS_PER_INCH);
+
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + targetTicks);
+        backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() + targetTicks);
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + targetTicks);
+        backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() + targetTicks);
+
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        backRightMotor.setPower(power);
+
+        while (opModeIsActive() &&
+               frontLeftMotor.isBusy() && frontRightMotor.isBusy() &&
+               backLeftMotor.isBusy() && backRightMotor.isBusy()) {}
+
+        stopMotors();
+    }
+
+    // === Strafe left/right with encoders ===
+    public void strafeForDistance(double inches, double power, boolean right) {
+        int targetTicks = (int)(inches * TICKS_PER_INCH);
+        int dir = right ? 1 : -1;
+
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() + dir * targetTicks);
+        backLeftMotor.setTargetPosition(backLeftMotor.getCurrentPosition() - dir * targetTicks);
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() - dir * targetTicks);
+        backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() + dir * targetTicks);
+
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        backRightMotor.setPower(power);
+
+        while (opModeIsActive() &&
+               frontLeftMotor.isBusy() && frontRightMotor.isBusy() &&
+               backLeftMotor.isBusy() && backRightMotor.isBusy()) {}
+
+        stopMotors();
+    }
+
+    // === Drive and turn at same time ===
+    public void driveAndTurn(double xPower, double turnPower, double duration) {
+        double fl = xPower + turnPower;
+        double fr = xPower - turnPower;
+        double bl = xPower + turnPower;
+        double br = xPower - turnPower;
+
+        // normalize
+        double max = Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(bl), Math.abs(br)));
+        if (max > 1.0) {
+            fl /= max;
+            fr /= max;
+            bl /= max;
+            br /= max;
+        }
+
+        frontLeftMotor.setPower(fl);
+        frontRightMotor.setPower(fr);
+        backLeftMotor.setPower(bl);
+        backRightMotor.setPower(br);
+
+        sleep((long)(duration * 1000));
+
+        stopMotors();
+    }
+
+    // === Stop all drive motors ===
+    public void stopMotors() {
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
+    }
+}
