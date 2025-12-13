@@ -1,0 +1,121 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+
+@TeleOp(name = "Soundwave TeleOp 2 (Auto Gate)", group = "Linear OpMode")
+public class SoundwaveTeleop2 extends LinearOpMode {
+
+    // ================= MOTORS =================
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
+    private DcMotor intake1, intake2;
+    private DcMotorEx flywheelLeft, flywheelRight;
+
+    // ================= SERVO =================
+    private Servo gate;
+
+    // ================= CONSTANTS =================
+    private static final double GATE_CLOSED = 0.30;
+    private static final double GATE_OPEN   = -0.8;
+
+    private static final double FULL_SPEED_RPM = 4500;
+    private static final double HALF_SPEED_RPM = 2000;
+    private static final double RPM_TOLERANCE  = 75;
+
+    private static final double COUNTS_PER_REV = 580.4;
+
+    @Override
+    public void runOpMode() {
+
+        // ================= HARDWARE MAP =================
+        frontLeft  = hardwareMap.get(DcMotor.class, "portTwo");
+        frontRight = hardwareMap.get(DcMotor.class, "portTwoEXP");
+        backLeft   = hardwareMap.get(DcMotor.class, "portThree");
+        backRight  = hardwareMap.get(DcMotor.class, "portThreeEXP");
+
+        intake1 = hardwareMap.get(DcMotor.class, "portZero");
+        intake2 = hardwareMap.get(DcMotor.class, "portZeroEXP");
+
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "portOneEXP");
+
+        gate = hardwareMap.get(Servo.class, "servoZero");
+        gate.setPosition(GATE_CLOSED);
+
+        // ================= DIRECTIONS =================
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        intake1.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheelLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // ================= MODES =================
+        flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        waitForStart();
+
+        // ================= MAIN LOOP =================
+        while (opModeIsActive()) {
+
+            // ================= DRIVE (MECANUM) =================
+            double y = -gamepad1.left_stick_y;
+            double x =  gamepad1.left_stick_x;
+            double turn = gamepad1.right_stick_x * 0.6;
+
+            double denom = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(turn), 1);
+            frontLeft.setPower((y + x + turn) / denom);
+            frontRight.setPower((y - x - turn) / denom);
+            backLeft.setPower((y - x + turn) / denom);
+            backRight.setPower((y + x - turn) / denom);
+
+            // ================= INTAKE =================
+            double intakePower = 0;
+            if (gamepad1.right_trigger > 0.1 || gamepad2.a) {
+                intakePower = 1.0;
+            }
+            intake1.setPower(intakePower);
+            intake2.setPower(intakePower);
+
+            // ================= FLYWHEELS =================
+            double targetRPM = 0;
+
+            if (gamepad2.right_trigger > 0.1) {
+                targetRPM = FULL_SPEED_RPM;
+            } else if (gamepad2.left_trigger > 0.1) {
+                targetRPM = HALF_SPEED_RPM;
+            }
+
+            double targetTPS = (targetRPM * COUNTS_PER_REV) / 60.0;
+
+            flywheelLeft.setVelocity(targetTPS);
+            flywheelRight.setVelocity(targetTPS);
+
+            // ================= AUTO GATE =================
+            boolean atSpeed =
+                    targetRPM > 0 &&
+                    Math.abs(flywheelLeft.getVelocity()  - targetTPS) < RPM_TOLERANCE &&
+                    Math.abs(flywheelRight.getVelocity() - targetTPS) < RPM_TOLERANCE;
+
+            if (atSpeed) {
+                gate.setPosition(GATE_OPEN);
+            } else {
+                gate.setPosition(GATE_CLOSED);
+            }
+
+            // ================= TELEMETRY =================
+            telemetry.addData("Target RPM", targetRPM);
+            telemetry.addData("Left Vel", flywheelLeft.getVelocity());
+            telemetry.addData("Right Vel", flywheelRight.getVelocity());
+            telemetry.addData("Gate", atSpeed ? "OPEN" : "CLOSED");
+            telemetry.update();
+        }
+    }
+}
