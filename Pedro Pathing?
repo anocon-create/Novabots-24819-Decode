@@ -27,24 +27,24 @@ public class RedFarPPAuton extends LinearOpMode {
     private DcMotorEx flywheelLeft, flywheelRight;
 
     // Full RPM for shooting
-    private final double FULL_SPEED_RPM = 800;
+    private final double FULL_SPEED_RPM = 1000;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         // ============================================================
-        // HARDWARE MAP — PLACEHOLDER "port" (you will rename later)
+        // HARDWARE MAP 
         // ============================================================
-        frontLeft  = hardwareMap.get(DcMotor.class, "port");
-        frontRight = hardwareMap.get(DcMotor.class, "port");
-        backLeft   = hardwareMap.get(DcMotor.class, "port");
-        backRight  = hardwareMap.get(DcMotor.class, "port");
+        frontLeft  = hardwareMap.get(DcMotor.class, "portTwo");
+        frontRight = hardwareMap.get(DcMotor.class, "portTwoEXP");
+        backLeft   = hardwareMap.get(DcMotor.class, "portThree");
+        backRight  = hardwareMap.get(DcMotor.class, "portThreeEXP");
 
-        intake1 = hardwareMap.get(DcMotor.class, "port");
-        intake2 = hardwareMap.get(DcMotor.class, "port");
+        intake1 = hardwareMap.get(DcMotor.class, "portZero");
+        intake2 = hardwareMap.get(DcMotor.class, "portZeroEXP");
 
-        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "port");
-        flywheelRight = hardwareMap.get(DcMotorEx.class, "port");
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "portOneEXP");
 
         // ============================================================
         // MOTOR DIRECTIONS
@@ -79,7 +79,7 @@ public class RedFarPPAuton extends LinearOpMode {
         flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // ============================================================
-        // INITIALIZE PEDRO MECHANUM DRIVE
+        // INITIALIZE PEDRO MECANUM DRIVE
         // ============================================================
         drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
 
@@ -97,7 +97,7 @@ public class RedFarPPAuton extends LinearOpMode {
         preSpinShooter();
 
         // ------------------------------------------------------------
-        // SEQUENCE: Shoot → Intake → Shoot ... etc
+        // SEQUENCE: Shoot → Intake → Shoot
         // ------------------------------------------------------------
 
         drive.followPath(splineShootFast());
