@@ -24,11 +24,12 @@ public class RedSoundwaveFarAuton extends LinearOpMode {
             COUNTS_PER_REV / (Math.PI * WHEEL_DIAMETER);
 
     // ================= SHOOTER =================
-    private static final double TARGET_RPM = 6000;
+    private static final double FULL_RPM = 6000;
+    private static final double HALF_RPM = 2400;
     private static final double RPM_TOLERANCE = 200;
 
     private static final double GATE_CLOSED = 0.30;
-    private static final double GATE_OPEN   = -0.8; // ⚠ if unstable use 0.0
+    private static final double GATE_OPEN   = -0.8;
 
     // ================= INIT =================
     @Override
@@ -79,13 +80,17 @@ public class RedSoundwaveFarAuton extends LinearOpMode {
         if (isStopRequested()) return;
 
         // ================= AUTON PATH =================
-        shootThree();
+
+        // --- First shot (far) ---
+        shootThree(FULL_RPM); 
 
         turnForAngle(-45, 0.5);
         strafeAndRotate(0.6, 0.3, 1.0);
         intakeBall();
         strafeAndRotate(-0.7, 0.3, 0.75);
-        shootThree();
+
+        // --- Second shot (mid) ---
+        shootThree(FULL_RPM); 
 
         strafeAndRotate(0.7, -0.6, 1.0);
         intakeBall();
@@ -93,50 +98,37 @@ public class RedSoundwaveFarAuton extends LinearOpMode {
         driveForDistance(12, 0.6);
         strafeForDistance(18, 0.7, true);
         strafeAndRotate(-0.7, 0.6, 1.0);
-        shootThree();
 
-        strafeAndRotate(0.6, 0.5, 0.75);
-        intakeBall();
-        driveAndTurn(0.6, -0.5, 0.75);
-        shootThree();
-
-        turnForAngle(30, 0.6);
-        driveForDistance(36, 0.7);
-        turnForAngle(90, 0.6);
-        intakeBall();
-
-        strafeAndRotate(0.6, 0.6, 0.8);
-        shootThree();
-        strafeAndRotate(0.8, 0.6, 0.75);
-        intakeBall();
-        strafeAndRotate(0.6, 0.6, 0.8);
-        shootThree();
+        // --- Third shot (close) ---
+        shootThree(HALF_RPM); // half-speed close shot
 
         driveForDistance(36, 0.7);
         stopDrive();
     }
 
     // ================= SHOOTER (RPM LOCKED) =================
-    private void shootThree() {
+    private void shootThree(double targetRPM) {
 
         gate.setPosition(GATE_CLOSED);
 
-        double targetTPS = (TARGET_RPM * COUNTS_PER_REV) / 60.0;
+        double targetTPS = (targetRPM * COUNTS_PER_REV) / 60.0;
         flywheelLeft.setVelocity(targetTPS);
         flywheelRight.setVelocity(targetTPS);
 
         ElapsedTime timer = new ElapsedTime();
         timer.reset();
 
-        while (opModeIsActive() && !flywheelsAtSpeed() && timer.seconds() < 2.0) {}
+        // Wait for flywheels to spin up
+        while (opModeIsActive() && !flywheelsAtSpeed(targetRPM) && timer.seconds() < 2.0) {}
 
+        // Fire 3 balls
         for (int i = 0; i < 3; i++) {
 
-            while (opModeIsActive() && !flywheelsAtSpeed()) {}
+            while (opModeIsActive() && !flywheelsAtSpeed(targetRPM)) {}
 
             gate.setPosition(GATE_OPEN);
             intake1.setPower(-0.9);
-            intake2.setPower(-0.9);
+            intake2.setPower(0.9);
             sleep(350);
 
             intake1.setPower(0);
@@ -149,8 +141,8 @@ public class RedSoundwaveFarAuton extends LinearOpMode {
         flywheelRight.setVelocity(0);
     }
 
-    private boolean flywheelsAtSpeed() {
-        double targetTPS = (TARGET_RPM * COUNTS_PER_REV) / 60.0;
+    private boolean flywheelsAtSpeed(double targetRPM) {
+        double targetTPS = (targetRPM * COUNTS_PER_REV) / 60.0;
         return Math.abs(flywheelLeft.getVelocity()  - targetTPS) < RPM_TOLERANCE &&
                Math.abs(flywheelRight.getVelocity() - targetTPS) < RPM_TOLERANCE;
     }
@@ -203,7 +195,7 @@ public class RedSoundwaveFarAuton extends LinearOpMode {
     private void intakeBall() {
         setDrivePower(-0.6, -0.6, -0.6, -0.6);
         intake1.setPower(-0.8);
-        intake2.setPower(-0.8);
+        intake2.setPower(0.8);
         sleep(1000);
         stopDrive();
         intake1.setPower(0);
