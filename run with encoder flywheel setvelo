@@ -48,7 +48,7 @@ public class RedEncoderFarAuton extends LinearOpMode {
         intake2 = hardwareMap.get(DcMotor.class, "portZeroEXP");
         flywheelLeft = hardwareMap.get(DcMotor.class, "portOne");
         flywheelRight = hardwareMap.get(DcMotor.class, "portOneEXP");
-        myServo = hardwareMap.get(Servo.class, "myServo");
+        myServo = hardwareMap.get(Servo.class, "servoFour");
 
         // === Set initial servo position ===
         myServo.setPosition(startPosition);
