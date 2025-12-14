@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "Soundwave TeleOp (Auto Gate + Adjustments)", group = "Linear OpMode")
+@TeleOp(name = "Soundwave TeleOp ", group = "Linear OpMode")
 public class SoundwaveTeleop extends LinearOpMode {
 
     // ================= MOTORS =================
