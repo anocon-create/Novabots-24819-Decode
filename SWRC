@@ -1,0 +1,241 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+
+@Autonomous(name = "Soundwave Red Close", group = "Linear OpMode")
+public class SoundwaveRedClose extends LinearOpMode {
+
+    // Hardware
+    private DcMotor frontLeft, backLeft, frontRight, backRight;
+    private DcMotor intake1, intake2;
+    private DcMotorEx flywheelLeft, flywheelRight;
+    private Servo shooterServo;
+
+    // Constants
+    private static final double TICKS_PER_REV = 112.0;
+    private static final double WHEEL_DIAMETER_INCHES = 4.094;
+    private static final double COUNTS_PER_INCH = TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_INCHES);
+    private static final double TRACK_WIDTH_INCHES = 17.5;
+    private static final double TARGET_RPM = 3500;
+    private static final double SERVO_OPEN = 0.0;
+    private static final double SERVO_CLOSED = 0.3;
+
+    // PIDF coefficients for flywheel
+    private static final double kP = 0.01;
+    private static final double kI = 0.0;
+    private static final double kD = 0.0005;
+    private static final double kF = 13.5;
+
+    @Override
+    public void runOpMode() {
+
+        // Hardware map
+        frontLeft  = hardwareMap.get(DcMotor.class, "portTwo");
+        backLeft   = hardwareMap.get(DcMotor.class, "portThree");
+        frontRight = hardwareMap.get(DcMotor.class, "portTwoEXP");
+        backRight  = hardwareMap.get(DcMotor.class, "portThreeEXP");
+
+        intake1 = hardwareMap.get(DcMotor.class, "portZero");
+        intake2 = hardwareMap.get(DcMotor.class, "portZeroEXP");
+
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "portOneEXP");
+
+        shooterServo = hardwareMap.get(Servo.class, "servoFour");
+
+        // Servo setup
+        shooterServo.scaleRange(0.0, 1.0);
+        shooterServo.setPosition(SERVO_CLOSED);
+
+        // Motor directions
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheelRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Encoders
+        flywheelLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheelRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // PIDF setup for flywheels
+        flywheelLeft.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+        flywheelRight.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+
+        // Reset drive encoders
+        resetDriveEncoders();
+
+        waitForStart();
+
+        // ------------------------
+        // Autonomous sequence
+        // ------------------------
+        driveForDistance(68, 0.7, false);
+
+        shootSequence(1);
+
+        rotate(-145, 0.7);
+
+        reverseAndIntake(68, 0.7);
+
+        driveForDistance(68, 0.7, true);
+
+        rotate(145, 0.7);
+
+        shootSequence(1);
+
+        rotate(-145, 0.7);
+
+        strafe(-24,0.7);
+
+        reverseAndIntake(52, 0.8);
+
+        driveForDistance(52, 0.8, true);
+
+        strafe(26, 0.8);
+
+        rotate(145, 0.8);
+
+        shootSequence(1);
+
+        rotate(-145, 0.5);
+
+        strafe(-60, 0.8);
+
+        reverseAndIntake(68, 0.7);
+
+        driveForDistance(68, 0.7, true);
+
+        strafe(60, 0.8);
+
+        rotate(-145, 0.8);
+
+        shootSequence(1);
+
+        strafe(10, 0.7);
+    }
+
+    /* =========================
+       DRIVE FUNCTIONS (ENCODER-BASED)
+       ========================= */
+    private void driveForDistance(double inches, double power, boolean forward) {
+        int targetCounts = (int)(inches * COUNTS_PER_INCH);
+
+        // Reverse if forward is false
+        if (!forward) targetCounts = -targetCounts;
+
+        runMotorsToPosition(targetCounts, targetCounts, targetCounts, targetCounts, power);
+    }
+
+    private void reverseAndIntake(double inches, double power) {
+        int targetCounts = (int)(inches * COUNTS_PER_INCH);
+
+        // Start intake at -1 power while reversing
+        intake1.setPower(-1.0);
+        intake2.setPower(-1.0);
+
+        // Move drive motors backward
+        runMotorsToPosition(-targetCounts, -targetCounts, -targetCounts, -targetCounts, power);
+
+        // Stop intake after movement
+        intake1.setPower(0);
+        intake2.setPower(0);
+    }
+
+    private void strafe(double inches, double power) {
+        int targetCounts = (int)(inches * COUNTS_PER_INCH);
+        runMotorsToPosition(targetCounts, -targetCounts, -targetCounts, targetCounts, power);
+    }
+
+    private void rotate(double degrees, double power) {
+        double inchesPerDegree = Math.PI * TRACK_WIDTH_INCHES / 360.0;
+        int counts = (int)(degrees * inchesPerDegree * COUNTS_PER_INCH);
+        runMotorsToPosition(counts, counts, -counts, -counts, power);
+    }
+
+    private void runMotorsToPosition(int flCounts, int blCounts, int frCounts, int brCounts, double power) {
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeft.setTargetPosition(flCounts);
+        backLeft.setTargetPosition(blCounts);
+        frontRight.setTargetPosition(frCounts);
+        backRight.setTargetPosition(brCounts);
+
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeft.setPower(power);
+        backLeft.setPower(power);
+        frontRight.setPower(power);
+        backRight.setPower(power);
+
+        while (opModeIsActive() &&
+               (frontLeft.isBusy() || backLeft.isBusy() || frontRight.isBusy() || backRight.isBusy())) {
+            idle();
+        }
+
+        stopMotors();
+    }
+
+    private void stopMotors() {
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
+    }
+
+    private void resetDriveEncoders() {
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+    /* =========================
+       SHOOTING + INTAKE
+       ========================= */
+    private void shootSequence(double durationSeconds) {
+        double ticksPerSecond = (TARGET_RPM * TICKS_PER_REV) / 60.0;
+
+        // Start flywheels
+        flywheelLeft.setVelocity(ticksPerSecond);
+        flywheelRight.setVelocity(ticksPerSecond);
+
+        // Wait for flywheels to reach target RPM
+        while (opModeIsActive()) {
+            double leftRPM = (flywheelLeft.getVelocity() * 60) / TICKS_PER_REV;
+            double rightRPM = (flywheelRight.getVelocity() * 60) / TICKS_PER_REV;
+            if (Math.abs(leftRPM - TARGET_RPM) < 100 && Math.abs(rightRPM - TARGET_RPM) < 100) {
+                break;
+            }
+            idle();
+        }
+
+        // Open servo (gate)
+        shooterServo.setPosition(SERVO_OPEN);
+
+        // Start intake
+        intake1.setPower(-1.0);
+        intake2.setPower(-1.0);
+
+        // Maintain for specified duration
+        sleep((long)(durationSeconds * 1000));
+
+        // Stop intake and close servo
+        intake1.setPower(0);
+        intake2.setPower(0);
+        shooterServo.setPosition(SERVO_CLOSED);
+
+        // Stop flywheels
+        flywheelLeft.setVelocity(0);
+        flywheelRight.setVelocity(0);
+    }
+}
