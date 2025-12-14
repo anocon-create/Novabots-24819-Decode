@@ -1,0 +1,85 @@
+@Autonomous(name = "Soundwave Red Close", group = "Linear OpMode")
+public class SoundwaveRedClose extends LinearOpMode {
+
+    PedroDrive drive;
+
+    @Override
+    public void runOpMode() {
+
+        // --- Hardware setup (same as your original) ---
+        initHardware();
+
+        Pose startPose = new Pose(0, 0, 0);
+        drive = new PedroDrive(hardwareMap, startPose);
+
+        waitForStart();
+
+        /* =========================
+           PATH 1 — TO FIRST SHOT
+           ========================= */
+        Path toShot1 = new PathBuilder()
+                .addSpline(
+                        startPose,
+                        new Pose(68, 0, Math.toRadians(-145))
+                )
+                .addDisplacementMarker(0.80, () -> startFlywheels())
+                .build();
+
+        drive.followPath(toShot1);
+        drive.waitForIdle();
+        shootWhenReady(1.0);
+
+        /* =========================
+           PATH 2 — INTAKE + RETURN
+           ========================= */
+        Path intake1 = new PathBuilder()
+                .addSpline(
+                        new Pose(68, 0, Math.toRadians(-145)),
+                        new Pose(68, -24, Math.toRadians(-145))
+                )
+                .build();
+
+        drive.followPath(intake1);
+        drive.waitForIdle();
+
+        Path backToShot2 = new PathBuilder()
+                .addSpline(
+                        new Pose(68, -24, Math.toRadians(-145)),
+                        new Pose(68, 0, Math.toRadians(145))
+                )
+                .addDisplacementMarker(0.75, () -> startFlywheels())
+                .build();
+
+        drive.followPath(backToShot2);
+        drive.waitForIdle();
+        shootWhenReady(1.0);
+
+        /* =========================
+           PATH 3 — LONG STRAFE + SHOT
+           ========================= */
+        Path longStrafe = new PathBuilder()
+                .addSpline(
+                        new Pose(68, 0, Math.toRadians(145)),
+                        new Pose(68, -60, Math.toRadians(145))
+                )
+                .addDisplacementMarker(0.70, () -> startFlywheels())
+                .build();
+
+        drive.followPath(longStrafe);
+        drive.waitForIdle();
+        shootWhenReady(1.0);
+
+        /* =========================
+           FINAL PARK
+           ========================= */
+        Path park = new PathBuilder()
+                .addLine(
+                        new Pose(68, -60, Math.toRadians(145)),
+                        new Pose(78, -60, Math.toRadians(145))
+                )
+                .build();
+
+        drive.followPath(park);
+        drive.waitForIdle();
+    }
+}
