@@ -73,7 +73,7 @@ public class SoundwaveRedClose extends LinearOpMode {
         // ------------------------
         // Autonomous sequence
         // ------------------------
-        driveForDistance(68,0.7,false);
+        driveForDistance(68, 0.7, false);
 
         shootSequence(0.75);
 
@@ -81,43 +81,43 @@ public class SoundwaveRedClose extends LinearOpMode {
 
         reverseAndIntake(68, 0.7);
 
-        driveForDistance(68,0.7,true);
+        driveForDistance(68, 0.7, true);
 
-        rotate(-135,0.7);
-
-        shootSequence(0.75);
-
-        rotate(45,0.7);
-
-        driveForDistance(24,0.6,false);
-
-        rotate(90,0.7);
-
-        reverseAndIntake(52,0.8);
-
-        driveForDistance(52,0.8,true);
-
-        strafe(26,0.8);
-
-        rotate(-125,0.8);
+        rotate(-135, 0.7);
 
         shootSequence(0.75);
 
-        rotate(125,0.5);
+        rotate(45, 0.7);
 
-        strafe(60,0.8);
+        driveForDistance(24, 0.6, false);
 
-        reverseAndIntake(68,0.7);
+        rotate(90, 0.7);
 
-        driveForDistance(68,0.7,true);
+        reverseAndIntake(52, 0.8);
 
-        strafe(60,0.8);
+        driveForDistance(52, 0.8, true);
 
-        rotate(-125);
+        strafe(26, 0.8);
+
+        rotate(-125, 0.8);
 
         shootSequence(0.75);
 
-        strafe(10,0.7);
+        rotate(125, 0.5);
+
+        strafe(60, 0.8);
+
+        reverseAndIntake(68, 0.7);
+
+        driveForDistance(68, 0.7, true);
+
+        strafe(60, 0.8);
+
+        rotate(-125, 0.8);
+
+        shootSequence(0.75);
+
+        strafe(10, 0.7);
     }
 
     /* =========================
@@ -130,8 +130,6 @@ public class SoundwaveRedClose extends LinearOpMode {
         if (!forward) targetCounts = -targetCounts;
 
         runMotorsToPosition(targetCounts, targetCounts, targetCounts, targetCounts, power);
-
-        // Drive forward is true and backwards is false
     }
 
     private void reverseAndIntake(double inches, double power) {
@@ -203,7 +201,7 @@ public class SoundwaveRedClose extends LinearOpMode {
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    // =========================
+    /* =========================
        SHOOTING + INTAKE
        ========================= */
     private void shootSequence(double durationSeconds) {
