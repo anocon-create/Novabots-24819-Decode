@@ -4,18 +4,36 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "Soundwave Red Close", group = "Linear OpMode")
-public class SoundwaveRedClose extends LinearOpMode {
+import com.pedropathing.PedroDrive;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.path.Path;
+import com.pedropathing.path.PathBuilder;
 
-    PedroDrive drive;
+@Autonomous(name = "Soundwave Red Close Pedro", group = "Linear OpMode")
+public class SoundwaveRedClosePedro extends LinearOpMode {
+
+    // Drive + Pedro
+    private PedroDrive drive;
+
+    // Hardware
+    private DcMotor frontLeft, backLeft, frontRight, backRight;
+    private DcMotor intake1, intake2;
+    private DcMotorEx flywheelLeft, flywheelRight;
+    private Servo shooterServo;
+
+    // Constants
+    private static final double TICKS_PER_REV = 112.0;
+    private static final double TARGET_RPM = 3500;
+
+    // Servo positions
+    private static final double SERVO_OPEN = 0.0;
+    private static final double SERVO_CLOSED = 0.3;
 
     @Override
     public void runOpMode() {
 
-        // --- Hardware setup (same as your original) ---
         initHardware();
 
         Pose startPose = new Pose(0, 0, 0);
@@ -31,24 +49,26 @@ public class SoundwaveRedClose extends LinearOpMode {
                         startPose,
                         new Pose(68, 0, Math.toRadians(-145))
                 )
-                .addDisplacementMarker(0.80, () -> startFlywheels())
+                // Spin up flywheels near the end of the path
+                .addDisplacementMarker(0.8, this::startFlywheels)
                 .build();
 
         drive.followPath(toShot1);
         drive.waitForIdle();
+
         shootWhenReady(1.0);
 
         /* =========================
            PATH 2 — INTAKE + RETURN
            ========================= */
-        Path intake1 = new PathBuilder()
+        Path intake1Path = new PathBuilder()
                 .addSpline(
                         new Pose(68, 0, Math.toRadians(-145)),
                         new Pose(68, -24, Math.toRadians(-145))
                 )
                 .build();
 
-        drive.followPath(intake1);
+        drive.followPath(intake1Path);
         drive.waitForIdle();
 
         Path backToShot2 = new PathBuilder()
@@ -56,11 +76,12 @@ public class SoundwaveRedClose extends LinearOpMode {
                         new Pose(68, -24, Math.toRadians(-145)),
                         new Pose(68, 0, Math.toRadians(145))
                 )
-                .addDisplacementMarker(0.75, () -> startFlywheels())
+                .addDisplacementMarker(0.75, this::startFlywheels)
                 .build();
 
         drive.followPath(backToShot2);
         drive.waitForIdle();
+
         shootWhenReady(1.0);
 
         /* =========================
@@ -71,11 +92,12 @@ public class SoundwaveRedClose extends LinearOpMode {
                         new Pose(68, 0, Math.toRadians(145)),
                         new Pose(68, -60, Math.toRadians(145))
                 )
-                .addDisplacementMarker(0.70, () -> startFlywheels())
+                .addDisplacementMarker(0.7, this::startFlywheels)
                 .build();
 
         drive.followPath(longStrafe);
         drive.waitForIdle();
+
         shootWhenReady(1.0);
 
         /* =========================
@@ -90,5 +112,79 @@ public class SoundwaveRedClose extends LinearOpMode {
 
         drive.followPath(park);
         drive.waitForIdle();
+    }
+
+    // =========================
+    // Hardware Initialization
+    // =========================
+    private void initHardware() {
+        frontLeft  = hardwareMap.get(DcMotor.class, "portTwo");
+        backLeft   = hardwareMap.get(DcMotor.class, "portThree");
+        frontRight = hardwareMap.get(DcMotor.class, "portTwoEXP");
+        backRight  = hardwareMap.get(DcMotor.class, "portThreeEXP");
+
+        intake1 = hardwareMap.get(DcMotor.class, "portZero");
+        intake2 = hardwareMap.get(DcMotor.class, "portZeroEXP");
+
+        flywheelLeft  = hardwareMap.get(DcMotorEx.class, "portOne");
+        flywheelRight = hardwareMap.get(DcMotorEx.class, "portOneEXP");
+
+        shooterServo = hardwareMap.get(Servo.class, "servoFour");
+
+        shooterServo.scaleRange(0.0, 1.0);
+        shooterServo.setPosition(SERVO_CLOSED);
+
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        flywheelRight.setDirection(DcMotor.Direction.REVERSE);
+
+        flywheelLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        flywheelRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        // Optional: set PIDF coefficients
+        flywheelLeft.setVelocityPIDFCoefficients(0.01, 0.0, 0.0005, 13.5);
+        flywheelRight.setVelocityPIDFCoefficients(0.01, 0.0, 0.0005, 13.5);
+    }
+
+    // =========================
+    // Flywheel control
+    // =========================
+    private void startFlywheels() {
+        double ticksPerSecond = (TARGET_RPM * TICKS_PER_REV) / 60.0;
+        flywheelLeft.setVelocity(ticksPerSecond);
+        flywheelRight.setVelocity(ticksPerSecond);
+    }
+
+    private void shootWhenReady(double durationSeconds) {
+        long startTime = System.currentTimeMillis();
+
+        while (opModeIsActive()) {
+
+            double leftRPM  = flywheelLeft.getVelocity() * 60 / TICKS_PER_REV;
+            double rightRPM = flywheelRight.getVelocity() * 60 / TICKS_PER_REV;
+
+            boolean atSpeed = Math.abs(leftRPM - TARGET_RPM) < 100 &&
+                              Math.abs(rightRPM - TARGET_RPM) < 100;
+
+            if (atSpeed) {
+                shooterServo.setPosition(SERVO_OPEN);
+                intake1.setPower(-1.0);
+                intake2.setPower(-1.0);
+            } else {
+                shooterServo.setPosition(SERVO_CLOSED);
+            }
+
+            if (System.currentTimeMillis() - startTime > durationSeconds * 1000)
+                break;
+
+            idle();
+        }
+
+        // Stop motors after shooting
+        shooterServo.setPosition(SERVO_CLOSED);
+        intake1.setPower(0);
+        intake2.setPower(0);
+        flywheelLeft.setVelocity(0);
+        flywheelRight.setVelocity(0);
     }
 }
