@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "Soundwave Red Close", group = "Linear OpMode")
-public class SoundwaveRedClose extends LinearOpMode {
+@Autonomous(name = "Soundwave Blue Close", group = "Linear OpMode")
+public class SoundwaveBlueClose extends LinearOpMode {
 
     // Hardware
     private DcMotor frontLeft, backLeft, frontRight, backRight;
