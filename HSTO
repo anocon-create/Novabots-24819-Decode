@@ -1,0 +1,162 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+
+@TeleOp(name = "Hood Shooter TeleOp", group = "Linear OpMode")
+public class HoodShooterTeleOp extends LinearOpMode {
+
+    /* =========================
+       HARDWARE
+       ========================= */
+    private DcMotor frontLeft, backLeft, frontRight, backRight;
+    private DcMotor intake;
+    private DcMotorEx flywheel;
+    private Servo hoodServo;
+    private Servo gateServo;
+
+    /* =========================
+       CONSTANTS
+       ========================= */
+    private static final double TICKS_PER_REV = 112.0;
+
+    // PIDF (ONLY P + F USED)
+    private static final double kP = 0.01;
+    private static final double kI = 0.0;
+    private static final double kD = 0.0;
+    private static final double kF = 13.5;
+
+    private static final double RPM_TOLERANCE = 100;
+
+    /* =========================
+       STATE
+       ========================= */
+    private double targetRPM = 0;
+    private boolean shooterReady = false; // <-- latch
+
+    @Override
+    public void runOpMode() {
+
+        /* =========================
+           HARDWARE MAP
+           ========================= */
+        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
+        backLeft   = hardwareMap.get(DcMotor.class, "backLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backRight  = hardwareMap.get(DcMotor.class, "backRight");
+
+        intake   = hardwareMap.get(DcMotor.class, "intake");
+        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+
+        hoodServo = hardwareMap.get(Servo.class, "hoodServo");
+        gateServo = hardwareMap.get(Servo.class, "gateServo");
+
+        /* =========================
+           SETUP
+           ========================= */
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+
+        hoodServo.setPosition(0.5);
+        gateServo.setPosition(0.0);
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            /* =========================
+               MECANUM DRIVE
+               ========================= */
+            double drive  = -gamepad1.left_stick_y;
+            double strafe =  gamepad1.left_stick_x;
+            double rotate =  gamepad1.right_stick_x;
+
+            double denom = Math.max(
+                    Math.abs(drive) + Math.abs(strafe) + Math.abs(rotate),
+                    1.0
+            );
+
+            frontLeft.setPower ((drive + strafe + rotate) / denom);
+            backLeft.setPower  ((drive - strafe + rotate) / denom);
+            frontRight.setPower((drive - strafe - rotate) / denom);
+            backRight.setPower ((drive + strafe - rotate) / denom);
+
+            /* =========================
+               SHOOTER PRESETS
+               ========================= */
+            if (gamepad1.y) {
+                hoodServo.setPosition(0.5);
+                targetRPM = 3000;
+                shooterReady = false;
+            } 
+            else if (gamepad1.x) {
+                hoodServo.setPosition(1.0);
+                targetRPM = 5500;
+                shooterReady = false;
+            } 
+            else if (gamepad1.b) {
+                hoodServo.setPosition(0.2);
+                targetRPM = 1500;
+                shooterReady = false;
+            }
+
+            /* =========================
+               FLYWHEEL CONTROL
+               ========================= */
+            boolean flywheelEnabled = gamepad1.left_trigger > 0.1;
+
+            if (flywheelEnabled) {
+                double ticksPerSecond =
+                        (targetRPM * TICKS_PER_REV) / 60.0;
+                flywheel.setVelocity(ticksPerSecond);
+            } else {
+                flywheel.setVelocity(0);
+                shooterReady = false; // reset latch
+            }
+
+            /* =========================
+               RPM MEASUREMENT
+               ========================= */
+            double currentRPM =
+                    (flywheel.getVelocity() * 60) / TICKS_PER_REV;
+
+            /* =========================
+               LATCH LOGIC (NO FLICKER)
+               ========================= */
+            if (!shooterReady &&
+                flywheelEnabled &&
+                Math.abs(currentRPM - targetRPM) < RPM_TOLERANCE) {
+                shooterReady = true;
+            }
+
+            /* =========================
+               GATE + INTAKE
+               ========================= */
+            if (shooterReady) {
+                gateServo.setPosition(0.8); // open gate
+                intake.setPower(1.0);       // feed
+            } else {
+                gateServo.setPosition(
+                        gamepad1.right_bumper ? 0.8 : 0.0
+                );
+                intake.setPower(
+                        gamepad1.right_trigger > 0.1 ? 1.0 : 0.0
+                );
+            }
+
+            /* =========================
+               TELEMETRY
+               ========================= */
+            telemetry.addData("Target RPM", targetRPM);
+            telemetry.addData("Current RPM", currentRPM);
+            telemetry.addData("Shooter Ready", shooterReady);
+            telemetry.update();
+        }
+    }
+}
