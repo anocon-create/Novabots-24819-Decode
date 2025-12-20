@@ -1,0 +1,65 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+@TeleOp(name = "Flywheel Test", group = "Test")
+public class FlywheelTest extends OpMode {
+
+    private DcMotorEx flywheel;
+
+    // goBILDA magnetic encoder
+    private static final double TICKS_PER_REV = 537.7;
+
+    // RPM targets
+    private static final double RPM_HIGH = 6000.0;
+    private static final double RPM_LOW  = 3000.0;
+
+    // PIDF (good starting point for goBILDA flywheels)
+    private static final PIDFCoefficients FLYWHEEL_PIDF =
+            new PIDFCoefficients(
+                    30.0,  // P
+                    0.0,   // I
+                    3.0,   // D
+                    13.5   // F
+            );
+
+    @Override
+    public void init() {
+        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        flywheel.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                FLYWHEEL_PIDF
+        );
+    }
+
+    @Override
+    public void loop() {
+        double targetRPM = 0.0;
+
+        if (gamepad1.right_trigger > 0.1) {
+            targetRPM = RPM_HIGH;   // 6000 RPM
+        } else if (gamepad1.left_trigger > 0.1) {
+            targetRPM = RPM_LOW;    // 3000 RPM
+        }
+
+        double targetVelocity = rpmToTicksPerSecond(targetRPM);
+        flywheel.setVelocity(targetVelocity);
+
+        telemetry.addData("Target RPM", targetRPM);
+        telemetry.addData("Target TPS", targetVelocity);
+        telemetry.addData("Actual TPS", flywheel.getVelocity());
+        telemetry.update();
+    }
+
+    private double rpmToTicksPerSecond(double rpm) {
+        return (rpm / 60.0) * TICKS_PER_REV;
+    }
+}
