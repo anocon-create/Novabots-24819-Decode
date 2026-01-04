@@ -1,0 +1,44 @@
+private DcMotorEx testMotor;
+private DcMotorEx testMotor2;
+
+// Maximum allowed power (75%)
+private static final double MAX_POWER = 0.75;
+
+@Override
+public void runOpMode() {
+
+    // ----- HARDWARE MAP -----
+    testMotor = hardwareMap.get(DcMotorEx.class, "portOne");
+    testMotor2 = hardwareMap.get(DcMotorEx.class, "portTwo");
+
+    testMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    testMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+    testMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    testMotor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+    telemetry.addLine("Dual Motor Test Ready");
+    telemetry.update();
+
+    waitForStart();
+
+    while (opModeIsActive()) {
+
+        // ----- CONTROL MOTORS WITH RIGHT TRIGGER -----
+        double rawPower = gamepad1.right_trigger; // 0.0 to 1.0
+        double limitedPower = Range.clip(rawPower, 0, MAX_POWER);
+
+        // First motor
+        testMotor.setPower(limitedPower);
+
+        // Second motor spins opposite direction
+        testMotor2.setPower(-limitedPower);
+
+        // ----- TELEMETRY -----
+        telemetry.addData("Raw Power", rawPower);
+        telemetry.addData("Limited Power", limitedPower);
+        telemetry.addData("Motor 1 Encoder", testMotor.getCurrentPosition());
+        telemetry.addData("Motor 2 Encoder", testMotor2.getCurrentPosition());
+        telemetry.update();
+    }
+}
