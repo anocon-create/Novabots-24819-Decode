@@ -80,17 +80,35 @@ public class HoodShooterTeleOp extends LinearOpMode {
             frontRight.setPower(fr);
             backRight.setPower(br);
 
-            // ======== FLYWHEEL ========
-            if (gamepad1.right_trigger > 0.1) {
-                double ticksPerSecond = (targetRPM * TICKS_PER_REV) / 60.0;
-                flywheel.setVelocity(ticksPerSecond);
-            } else {
-                flywheel.setVelocity(0);
-            }
+            // ======== FLYWHEEL + INTAKE CONTROL ========
+            boolean shooterActive = gamepad1.right_trigger > 0.1;
 
-            // Adjust target RPM
-            if (gamepad1.y) targetRPM = 550;
-            if (gamepad1.b) targetRPM = 750;
+            if (shooterActive) {
+            // Spin up flywheel
+           double ticksPerSecond = (targetRPM * TICKS_PER_REV) / 60.0;
+            flywheel.setVelocity(ticksPerSecond);
+
+            // Get current RPM
+            double currentRPM = (flywheel.getVelocity() * 60.0) / TICKS_PER_REV;
+
+               // Check if flywheel is at speed
+                if (currentRPM >= targetRPM - RPM_TOLERANCE) {
+                // Flywheel ready → run intakes
+                intake1.setPower(-1.0);
+                intake2.setPower(1.0);
+    } else {
+        // Not ready yet → keep intakes off
+        intake1.setPower(0);
+        intake2.setPower(0);
+    }
+
+} else {
+    // Shooter off
+    flywheel.setVelocity(0);
+    intake1.setPower(0);
+    intake2.setPower(0);
+}
+
 
             // ======== INTAKE ========
             if (gamepad1.left_trigger > 0.1) {
