@@ -1,0 +1,107 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+@TeleOp(name = "Hood Shooter TeleOp", group = "Linear OpMode")
+public class HoodShooterTeleOp extends LinearOpMode {
+
+    // Hardware
+    private DcMotor frontLeft, backLeft, frontRight, backRight;
+    private DcMotor intake1, intake2;
+    private DcMotorEx flywheel;
+
+    // Flywheel constants
+    private static final double TICKS_PER_REV = 112.0;
+    private double targetRPM = 500; // default RPM
+
+    // Flywheel PIDF coefficients
+    private static final double kP = 0.01;
+    private static final double kI = 0.0;
+    private static final double kD = 0.0005;
+    private static final double kF = 13.5;
+
+    @Override
+    public void runOpMode() {
+
+        // Hardware map
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+        intake1 = hardwareMap.get(DcMotor.class, "intake1");
+        intake2 = hardwareMap.get(DcMotor.class, "intake2");
+
+        flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+
+        // Motor directions
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        intake1.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake2.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Flywheel setup
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            // ======== DRIVING ========
+            double drive = -gamepad1.left_stick_y;   // forward/back
+            double strafe = gamepad1.left_stick_x;   // left/right
+            double rotate = gamepad1.right_stick_x;  // rotation
+
+            // Calculate motor powers for mecanum drive
+            double fl = drive + strafe + rotate;
+            double bl = drive - strafe + rotate;
+            double fr = drive - strafe - rotate;
+            double br = drive + strafe - rotate;
+
+            // Normalize powers if any > 1
+            double max = Math.max(Math.abs(fl), Math.max(Math.abs(bl), Math.max(Math.abs(fr), Math.abs(br))));
+            if (max > 1.0) {
+                fl /= max;
+                bl /= max;
+                fr /= max;
+                br /= max;
+            }
+
+            frontLeft.setPower(fl);
+            backLeft.setPower(bl);
+            frontRight.setPower(fr);
+            backRight.setPower(br);
+
+            // ======== FLYWHEEL ========
+            if (gamepad1.right_trigger > 0.1) {
+                double ticksPerSecond = (targetRPM * TICKS_PER_REV) / 60.0;
+                flywheel.setVelocity(ticksPerSecond);
+            } else {
+                flywheel.setVelocity(0);
+            }
+
+            // Adjust target RPM
+            if (gamepad1.y) targetRPM = 550;
+            if (gamepad1.b) targetRPM = 750;
+
+            // ======== INTAKE ========
+            if (gamepad1.left_trigger > 0.1) {
+                intake1.setPower(-1.0);
+                intake2.setPower(1.0);
+            } else {
+                intake1.setPower(0);
+                intake2.setPower(0);
+            }
+
+            idle();
+        }
+    }
+}
