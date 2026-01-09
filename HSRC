@@ -74,7 +74,7 @@ public class HoodShooterRedClose extends LinearOpMode {
         if (!opModeIsActive()) return;
 
         /* =========================
-           AUTON PATH (EXAMPLE)
+           AUTON PATH (15 ARTIFACTS)
            ========================= */
         driveForDistance(82, 0.7, false);
       
