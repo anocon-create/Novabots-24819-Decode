@@ -1,0 +1,160 @@
+package org.firstinspires.ftc.teamcode.teleop;
+
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+@TeleOp(name = "Hood Shooter TeleOp", group = "TeleOp")
+public class HoodShooterTeleOp extends OpMode {
+
+    // Drive motors
+    DcMotor frontLeft, frontRight, backLeft, backRight;
+
+    // Shooter + Intake
+    DcMotorEx shooter;
+    DcMotor intake;
+
+    // ===== Shooter Presets =====
+    enum ShooterPreset {
+        OFF,
+        LOW,
+        HIGH
+    }
+
+    ShooterPreset shooterPreset = ShooterPreset.OFF;
+    double targetRPM = 0;
+
+    // Button state tracking
+    boolean yPrev = false;
+    boolean bPrev = false;
+
+    // ===== PIDF COEFFICIENTS =====
+    static final double kP = 0.0003;
+    static final double kI = 0.0;
+    static final double kD = 0.00002;
+    static final double kF = 0.05;
+
+    // ===== Auto Feed Settings =====
+    static final double RPM_TOLERANCE = 25;   // allowable error
+    static final double FEED_POWER = -1.0;    // intake direction
+
+    @Override
+    public void init() {
+        frontLeft  = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft   = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight  = hardwareMap.get(DcMotor.class, "backRight");
+
+        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+        intake  = hardwareMap.get(DcMotor.class, "intake");
+
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+    }
+
+    @Override
+    public void loop() {
+
+        /* =====================
+           DRIVE (MECANUM)
+           ===================== */
+        double drive  = -gamepad1.left_stick_y;
+        double strafe = gamepad1.left_stick_x;
+        double turn   = gamepad1.right_stick_x;
+
+        double fl = drive + strafe + turn;
+        double fr = drive - strafe - turn;
+        double bl = drive - strafe + turn;
+        double br = drive + strafe - turn;
+
+        double max = Math.max(1.0, Math.max(
+                Math.max(Math.abs(fl), Math.abs(fr)),
+                Math.max(Math.abs(bl), Math.abs(br))
+        ));
+
+        frontLeft.setPower(fl / max);
+        frontRight.setPower(fr / max);
+        backLeft.setPower(bl / max);
+        backRight.setPower(br / max);
+
+        /* =====================
+           RPM PRESET TOGGLES
+           ===================== */
+        boolean yPressed = gamepad1.y && !yPrev;
+        boolean bPressed = gamepad1.b && !bPrev;
+
+        if (yPressed) {
+            if (shooterPreset == ShooterPreset.LOW) {
+                shooterPreset = ShooterPreset.OFF;
+                targetRPM = 0;
+            } else {
+                shooterPreset = ShooterPreset.LOW;
+                targetRPM = 500;
+            }
+        }
+
+        if (bPressed) {
+            if (shooterPreset == ShooterPreset.HIGH) {
+                shooterPreset = ShooterPreset.OFF;
+                targetRPM = 0;
+            } else {
+                shooterPreset = ShooterPreset.HIGH;
+                targetRPM = 750;
+            }
+        }
+
+        yPrev = gamepad1.y;
+        bPrev = gamepad1.b;
+
+        /* =====================
+           SHOOTER CONTROL
+           ===================== */
+        if (gamepad1.right_trigger > 0.1 && shooterPreset != ShooterPreset.OFF) {
+            shooter.setVelocity(rpmToTicksPerSecond(targetRPM));
+        } else {
+            shooter.setPower(0);
+        }
+
+        /* =====================
+           AUTO FEED LOGIC
+           ===================== */
+        double currentRPM =
+                shooter.getVelocity() * 60 / shooter.getMotorType().getTicksPerRev();
+
+        boolean atSpeed =
+                shooterPreset != ShooterPreset.OFF &&
+                Math.abs(targetRPM - currentRPM) <= RPM_TOLERANCE;
+
+        if (atSpeed) {
+            // Automatically feed when shooter is ready
+            intake.setPower(FEED_POWER);
+        } else {
+            // Manual intake control when not feeding
+            if (gamepad1.left_trigger > 0.1) {
+                intake.setPower(-1.0);
+            } else if (gamepad1.left_bumper) {
+                intake.setPower(1.0);
+            } else {
+                intake.setPower(0);
+            }
+        }
+
+        /* =====================
+           TELEMETRY
+           ===================== */
+        telemetry.addData("Preset", shooterPreset);
+        telemetry.addData("Target RPM", targetRPM);
+        telemetry.addData("Current RPM", currentRPM);
+        telemetry.addData("At Speed", atSpeed);
+        telemetry.update();
+    }
+
+    private double rpmToTicksPerSecond(double rpm) {
+        return rpm * shooter.getMotorType().getTicksPerRev() / 60.0;
+    }
+}
