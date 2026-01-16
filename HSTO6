@@ -1,0 +1,167 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+
+@TeleOp(name = "Hood Shooter TeleOp 4", group = "Test")
+public class HoodShooterTeleOp4 extends OpMode {
+
+    // ===== DRIVE MOTORS =====
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
+
+    // ===== SHOOTER / INTAKE / HOOD =====
+    private DcMotorEx flywheel;
+    private DcMotor intake;
+    private DcMotor hood;
+
+    // ===== SERVO =====
+    private Servo shooterServo;
+
+    // Servo positions
+    private static final double SERVO_DEFAULT = 0.0;
+    private static final double SERVO_PRESSED = 0.75;
+
+    // Button state tracking
+    private boolean lastXState = false;
+
+    // Encoder info
+    private static final double TICKS_PER_REV = 112;
+
+    // RPM targets
+    private static final double RPM_HIGH = 1300.0;
+    private static final double RPM_LOW  = 1050.0;
+
+    // PIDF coefficients
+    private static final PIDFCoefficients FLYWHEEL_PIDF =
+            new PIDFCoefficients(
+                    6.0,    // P
+                    0.0,    // I
+                    0.6,    // D
+                    13.5    // F
+            );
+
+    @Override
+    public void init() {
+
+        // ===== DRIVE SETUP =====
+        frontLeft  = hardwareMap.get(DcMotor.class, "e0");
+        frontRight = hardwareMap.get(DcMotor.class, "c2");
+        backLeft   = hardwareMap.get(DcMotor.class, "e1");
+        backRight  = hardwareMap.get(DcMotor.class, "c1");
+
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // ===== HOOD =====
+        hood = hardwareMap.get(DcMotor.class, "e3");
+        hood.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hood.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // ===== SHOOTER =====
+        flywheel = hardwareMap.get(DcMotorEx.class, "c0");
+        flywheel.setDirection(DcMotor.Direction.REVERSE);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                FLYWHEEL_PIDF
+        );
+
+        // ===== INTAKE =====
+        intake = hardwareMap.get(DcMotor.class, "EXP2");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // ===== SERVO =====
+        shooterServo = hardwareMap.get(Servo.class, "servoFour");
+        shooterServo.setPosition(SERVO_DEFAULT); // always start at 0
+    }
+
+    @Override
+    public void loop() {
+
+        // ===== MECANUM DRIVE =====
+        double forward = -gamepad1.left_stick_y;
+        double strafe  =  gamepad1.left_stick_x;
+        double rotate  =  gamepad1.right_stick_x;
+
+        double fl = forward + strafe + rotate;
+        double fr = forward - strafe - rotate;
+        double bl = forward - strafe + rotate;
+        double br = forward + strafe - rotate;
+
+        double max = Math.max(1.0,
+                Math.max(Math.abs(fl), Math.abs(fr)));
+        max = Math.max(max,
+                Math.max(Math.abs(bl), Math.abs(br)));
+
+        frontLeft.setPower(fl / max);
+        frontRight.setPower(fr / max);
+        backLeft.setPower(bl / max);
+        backRight.setPower(br / max);
+
+        // ===== SHOOTER CONTROL =====
+        double targetRPM = 0.0;
+
+        if (gamepad1.right_trigger > 0.1) {
+            targetRPM = RPM_HIGH;
+        } else if (gamepad1.left_trigger > 0.1) {
+            targetRPM = RPM_LOW;
+        }
+
+        flywheel.setVelocity(rpmToTicksPerSecond(targetRPM));
+
+        // ===== INTAKE CONTROL =====
+        if (gamepad1.right_bumper) {
+            intake.setPower(1.0);
+        } else if (gamepad1.left_bumper) {
+            intake.setPower(-1.0);
+        } else {
+            intake.setPower(0.0);
+        }
+
+        // ===== HOOD CONTROL =====
+        if (gamepad1.dpad_left) {
+            hood.setPower(-1.0);
+        } else if (gamepad1.dpad_right) {
+            hood.setPower(1.0);
+        } else {
+            hood.setPower(0.0);
+        }
+
+        // ===== SERVO CONTROL (GAMEPAD X) =====
+        boolean xPressed = gamepad1.x;
+
+        if (xPressed && !lastXState) {
+            // X was just pressed
+            shooterServo.setPosition(SERVO_PRESSED);
+        } else if (!xPressed && lastXState) {
+            // X was just released
+            shooterServo.setPosition(SERVO_DEFAULT);
+        }
+
+        lastXState = xPressed;
+
+        // ===== TELEMETRY =====
+        double currentRPM = (flywheel.getVelocity() / TICKS_PER_REV) * 60.0;
+
+        telemetry.addData("Target RPM", targetRPM);
+        telemetry.addData("Current RPM", currentRPM);
+        telemetry.addData("Servo Pos", shooterServo.getPosition());
+        telemetry.update();
+    }
+
+    private double rpmToTicksPerSecond(double rpm) {
+        return (rpm / 60.0) * TICKS_PER_REV;
+    }
+}
