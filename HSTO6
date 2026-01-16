@@ -43,6 +43,12 @@ public class HoodShooterTeleOp4 extends OpMode {
                     0.6,    // D
                     13.5    // F
             );
+    // PIDF Notes:
+    // F (13.5): Feedforward — provides most motor power to hold target RPM
+    // P (6.0): Proportional — corrects RPM error and improves shot recovery
+    // D (0.6): Derivative — reduces overshoot and stabilizes RPM changes
+    // I (0.0): Integral — disabled to prevent windup and RPM oscillation
+
 
     @Override
     public void init() {
