@@ -111,34 +111,6 @@ public class HoodShooterRedClose extends LinearOpMode {
         rotate(-45,0.8);
 
         strafe(18,0.8);
-
-        driveAndIntake(36,0.8,true);
-
-        driveForDistance(36,0.8,false);
-
-        strafe(18,0.8);
-
-        rotate(45,0.8);
-
-        shootSequence(0.8);
-
-        rotate(45,0.8);
-
-        strafe(6,0.8);
-
-        driveAndIntake(36,0.8,true);
-
-        driveForDistance(36,0.8,false);
-
-        rotate(45,0.8);
-
-        shootSequence(0.8);
-
-        rotate(45,0.8);
-
-        strafe(6,0.8);
-
-        driveForDistance(24,0.8,true);
     }
 
     /* =========================
