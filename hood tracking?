@@ -1,0 +1,239 @@
+package org.firstinspires.ftc.teamcode;
+
+import android.util.Size;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.*;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+@TeleOp(name = "TeleOp + Tracking", group = "Competition")
+public class TeleOpWithTracking extends LinearOpMode {
+
+    // ===================== DRIVE =====================
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
+
+    // ===================== SHOOTER / INTAKE / HOOD =====================
+    private DcMotorEx flywheel;
+    private DcMotor intake;
+    private DcMotorEx hood;
+
+    // ===================== SERVO =====================
+    private Servo shooterServo;
+    private static final double SERVO_DEFAULT = 1.0;
+    private static final double SERVO_PRESSED = 0.0;
+
+    // ===================== APRILTAG =====================
+    private VisionPortal visionPortal;
+    private AprilTagProcessor aprilTag;
+    private static final int TARGET_TAG_ID = 24;
+
+    // ===================== HOOD PIDF =====================
+    private static final double kP = 0.005;
+    private static final double kI = 0.000;
+    private static final double kD = 0.004;
+    private static final double kF = 0.015;
+    private static final double MAX_HOOD_POWER = 0.6;
+
+    private static final double YAW_ALPHA = 0.25;
+    private double filteredYaw = 0.0;
+
+    private double integralSum = 0.0;
+    private double lastError = 0.0;
+    private long lastTimeNs = 0;
+    private boolean hadTagLastLoop = false;
+
+    // ===================== SHOOTER =====================
+    private static final double TICKS_PER_REV = 112;
+    private static final double RPM_HIGH = 800.0;
+    private static final double RPM_LOW  = 600.0;
+
+    private enum ShooterMode { OFF, LOW, HIGH }
+    private ShooterMode shooterMode = ShooterMode.OFF;
+
+    private static final PIDFCoefficients FLYWHEEL_PIDF =
+            new PIDFCoefficients(5.0, 0.0, 3.0, 8.5);
+
+    // ===================== BUTTON STATE =====================
+    private boolean lastA = false;
+    private boolean lastY = false;
+    private boolean lastX = false;
+
+    @Override
+    public void runOpMode() {
+
+        // ===================== DRIVE =====================
+        frontLeft  = hardwareMap.get(DcMotor.class, "e0");
+        frontRight = hardwareMap.get(DcMotor.class, "c2");
+        backLeft   = hardwareMap.get(DcMotor.class, "e1");
+        backRight  = hardwareMap.get(DcMotor.class, "c1");
+
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+
+        for (DcMotor m : new DcMotor[]{frontLeft, frontRight, backLeft, backRight}) {
+            m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        // ===================== HOOD =====================
+        hood = hardwareMap.get(DcMotorEx.class, "e3");
+        hood.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hood.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // ===================== FLYWHEEL =====================
+        flywheel = hardwareMap.get(DcMotorEx.class, "c0");
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                FLYWHEEL_PIDF
+        );
+
+        // ===================== INTAKE =====================
+        intake = hardwareMap.get(DcMotor.class, "EXP2");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // ===================== SERVO =====================
+        shooterServo = hardwareMap.get(Servo.class, "servoZero");
+        shooterServo.setPosition(SERVO_DEFAULT);
+
+        // ===================== APRILTAG CAMERA =====================
+        aprilTag = AprilTagProcessor.easyCreateWithDefaults();
+
+        visionPortal = new VisionPortal.Builder()
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(320, 240)) // 🔥 Faster detection (C270)
+                .addProcessor(aprilTag)
+                .build();
+
+        // Optional but HIGHLY recommended
+        visionPortal.setManualExposure(6, 250);
+
+        telemetry.addLine("Shooter + AprilTag TeleOp Ready");
+        telemetry.update();
+
+        waitForStart();
+        lastTimeNs = System.nanoTime();
+
+        // ===================== MAIN LOOP =====================
+        while (opModeIsActive()) {
+
+            // ---------- MECANUM DRIVE ----------
+            double f = -gamepad1.left_stick_y;
+            double s =  gamepad1.left_stick_x;
+            double r =  gamepad1.right_stick_x;
+
+            double fl = f + s + r;
+            double fr = f - s - r;
+            double bl = f - s + r;
+            double br = f + s - r;
+
+            double max = Math.max(1.0,
+                    Math.max(Math.abs(fl),
+                    Math.max(Math.abs(fr),
+                    Math.max(Math.abs(bl), Math.abs(br)))));
+
+            frontLeft.setPower(fl / max);
+            frontRight.setPower(fr / max);
+            backLeft.setPower(bl / max);
+            backRight.setPower(br / max);
+
+            // ---------- SHOOTER MODE ----------
+            if (gamepad1.a && !lastA)
+                shooterMode = shooterMode == ShooterMode.LOW ? ShooterMode.OFF : ShooterMode.LOW;
+
+            if (gamepad1.y && !lastY)
+                shooterMode = shooterMode == ShooterMode.HIGH ? ShooterMode.OFF : ShooterMode.HIGH;
+
+            lastA = gamepad1.a;
+            lastY = gamepad1.y;
+
+            double rpm =
+                    shooterMode == ShooterMode.LOW  ? RPM_LOW  :
+                    shooterMode == ShooterMode.HIGH ? RPM_HIGH : 0.0;
+
+            flywheel.setVelocity((rpm * TICKS_PER_REV) / 60.0);
+
+            // ---------- INTAKE ----------
+            intake.setPower(
+                    gamepad1.right_bumper ? 1.0 :
+                    gamepad1.left_bumper  ? -1.0 : 0.0
+            );
+
+            // ---------- APRILTAG HOOD PID ----------
+            double hoodPower = 0.0;
+            AprilTagDetection tag = null;
+
+            for (AprilTagDetection d : aprilTag.getDetections()) {
+                if (d.id == TARGET_TAG_ID) {
+                    tag = d;
+                    break;
+                }
+            }
+
+            boolean hasTag = (tag != null);
+
+            long now = System.nanoTime();
+            double dt = (now - lastTimeNs) / 1e9;
+            lastTimeNs = now;
+
+            if (hasTag && dt > 0) {
+
+                // 🔥 Tag just reappeared → reset PID state
+                if (!hadTagLastLoop) {
+                    filteredYaw = tag.ftcPose.yaw;
+                    integralSum = 0.0;
+                    lastError = filteredYaw;
+                }
+
+                filteredYaw =
+                        (1.0 - YAW_ALPHA) * filteredYaw +
+                        YAW_ALPHA * tag.ftcPose.yaw;
+
+                double error = filteredYaw;
+                integralSum += error * dt;
+
+                double derivative = (error - lastError) / dt;
+                lastError = error;
+
+                hoodPower =
+                        kP * error +
+                        kI * integralSum +
+                        kD * derivative +
+                        kF * Math.signum(error);
+            } else {
+                integralSum = 0.0;
+            }
+
+            hadTagLastLoop = hasTag;
+
+            // ---------- MANUAL OVERRIDE ----------
+            if (gamepad1.dpad_left)  hoodPower = -1.0;
+            if (gamepad1.dpad_right) hoodPower =  1.0;
+
+            hood.setPower(Range.clip(hoodPower, -MAX_HOOD_POWER, MAX_HOOD_POWER));
+
+            // ---------- SHOOTER SERVO ----------
+            if (gamepad1.x && !lastX)
+                shooterServo.setPosition(SERVO_PRESSED);
+            else if (!gamepad1.x && lastX)
+                shooterServo.setPosition(SERVO_DEFAULT);
+
+            lastX = gamepad1.x;
+
+            // ---------- TELEMETRY ----------
+            telemetry.addData("Shooter Mode", shooterMode);
+            telemetry.addData("RPM",
+                    (flywheel.getVelocity() / TICKS_PER_REV) * 60.0);
+            telemetry.addData("Tag Seen", hasTag);
+            telemetry.addData("Yaw", filteredYaw);
+            telemetry.update();
+        }
+    }
+}
