@@ -1,0 +1,228 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+
+@Autonomous(name = "RC2", group = "Auton")
+public class RC2 extends LinearOpMode {
+
+    // ===== DRIVE MOTORS =====
+    DcMotor frontLeft, frontRight, backLeft, backRight;
+
+    // ===== MECHANISMS =====
+    DcMotor hood, intake;
+    DcMotorEx flywheel;
+    Servo shooterServo;
+
+    // =============================
+    // ===== DRIVETRAIN CONSTANTS ==
+    // =============================
+    static final double DRIVE_TICKS_PER_REV = 537.6; 
+    static final double WHEEL_DIAMETER_IN = 4.094; 
+    static final double COUNTS_PER_INCH =
+            DRIVE_TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_IN); // ≈ 41.8
+
+    // =============================
+    // ===== FLYWHEEL CONSTANTS ====
+    // =============================
+    static final double FLYWHEEL_TICKS_PER_REV = 28; 
+    static final double FLYWHEEL_RPM = 960;
+
+    // =============================
+    // ===== SERVO / INTAKE ========
+    // =============================
+    static final double SERVO_DEFAULT = 1.0;
+    static final double SERVO_SHOOT = 0.0;
+    static final double INTAKE_POWER = 1.0;
+
+    private static final PIDFCoefficients FLYWHEEL_PIDF =
+            new PIDFCoefficients(12.0, 0.0, 0.7, 12.0);
+
+    @Override
+    public void runOpMode() {
+
+        initHardware();
+
+        waitForStart();
+        if (isStopRequested()) return;
+
+        // =====================
+        // ===== PATHING =======
+        // =====================
+        // Negative - left, Positive - right
+        driveForDistanceWithFlywheel(-82, 0.8);
+        shootSequence();
+
+        rotate(45, 0.8);
+        strafe(6, 0.7);
+
+        driveAndIntake(36, 0.8);
+    }
+
+    // ==========================
+    // ===== INITIALIZATION =====
+    // ==========================
+    private void initHardware() {
+
+        frontLeft  = hardwareMap.get(DcMotor.class, "e0");
+        frontRight = hardwareMap.get(DcMotor.class, "c2");
+        backLeft   = hardwareMap.get(DcMotor.class, "e1");
+        backRight  = hardwareMap.get(DcMotor.class, "c1");
+
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.REVERSE);
+
+        setBrakeMode();
+
+        hood = hardwareMap.get(DcMotor.class, "e3");
+        hood.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        hood.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        flywheel = hardwareMap.get(DcMotorEx.class, "c0");
+        flywheel.setDirection(DcMotor.Direction.REVERSE);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flywheel.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                FLYWHEEL_PIDF
+        );
+
+        intake = hardwareMap.get(DcMotor.class, "EXP2");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        shooterServo = hardwareMap.get(Servo.class, "servoZero");
+        shooterServo.setPosition(SERVO_DEFAULT);
+
+        resetDriveEncoders();
+    }
+
+    // ==========================
+    // ===== DRIVE HELPERS ======
+    // ==========================
+    private void resetDriveEncoders() {
+        setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    private void setMode(DcMotor.RunMode mode) {
+        frontLeft.setMode(mode);
+        frontRight.setMode(mode);
+        backLeft.setMode(mode);
+        backRight.setMode(mode);
+    }
+
+    private void setBrakeMode() {
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    private void setTargetPositions(int fl, int fr, int bl, int br) {
+        frontLeft.setTargetPosition(fl);
+        frontRight.setTargetPosition(fr);
+        backLeft.setTargetPosition(bl);
+        backRight.setTargetPosition(br);
+    }
+
+    private void setDrivePower(double power) {
+        frontLeft.setPower(power);
+        frontRight.setPower(power);
+        backLeft.setPower(power);
+        backRight.setPower(power);
+    }
+
+    private boolean motorsBusy() {
+        return frontLeft.isBusy() && frontRight.isBusy()
+                && backLeft.isBusy() && backRight.isBusy();
+    }
+
+    private void stopDrive() {
+        setDrivePower(0);
+        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    // ==========================
+    // ===== MOVEMENT ===========
+    // ==========================
+    public void driveForDistance(double inches, double power) {
+        int ticks = (int) (inches * COUNTS_PER_INCH);
+
+        resetDriveEncoders();
+        setTargetPositions(ticks, ticks, ticks, ticks);
+        setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        setDrivePower(power);
+
+        while (opModeIsActive() && motorsBusy()) idle();
+        stopDrive();
+    }
+
+    public void driveForDistanceWithFlywheel(double inches, double power) {
+        startFlywheelRPM(FLYWHEEL_RPM);
+        driveForDistance(inches, power);
+    }
+
+    public void strafe(double inches, double power) {
+        int ticks = (int) (inches * COUNTS_PER_INCH);
+
+        resetDriveEncoders();
+        setTargetPositions(ticks, -ticks, -ticks, ticks);
+        setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        setDrivePower(power);
+
+        while (opModeIsActive() && motorsBusy()) idle();
+        stopDrive();
+    }
+
+    public void rotate(double degrees, double power) {
+        // Rough starting value – tune on field
+        double TICKS_PER_DEGREE = 11.0;
+        int ticks = (int) (degrees * TICKS_PER_DEGREE);
+
+        resetDriveEncoders();
+        setTargetPositions(ticks, -ticks, ticks, -ticks);
+        setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        setDrivePower(power);
+
+        while (opModeIsActive() && motorsBusy()) idle();
+        stopDrive();
+    }
+
+    public void driveAndIntake(double inches, double drivePower) {
+        intake.setPower(INTAKE_POWER);
+        driveForDistance(inches, drivePower);
+        intake.setPower(0);
+    }
+
+    // ==========================
+    // ===== SHOOTING ===========
+    // ==========================
+    public void shootSequence() {
+
+        startFlywheelRPM(FLYWHEEL_RPM);
+        intake.setPower(INTAKE_POWER);
+
+        sleep(900); // spin-up (tune)
+
+        shooterServo.setPosition(SERVO_SHOOT);
+        sleep(400);
+        shooterServo.setPosition(SERVO_DEFAULT);
+
+        sleep(150);
+
+        flywheel.setPower(0);
+        intake.setPower(0);
+    }
+
+    private void startFlywheelRPM(double rpm) {
+        double ticksPerSecond =
+                rpm * FLYWHEEL_TICKS_PER_REV / 60.0;
+        flywheel.setVelocity(ticksPerSecond);
+    }
+}
